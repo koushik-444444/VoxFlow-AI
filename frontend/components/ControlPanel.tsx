@@ -26,8 +26,10 @@ export function ControlPanel() {
     toggleRecording
   } = useAudioRecorder({
     onDataAvailable: (data) => {
-      console.log('Audio data available:', data.size)
-      if (data.size > 0) {
+      // ONLY send data if we are in the recording state
+      const { isRecording: currentRecording } = useStore.getState()
+      if (data.size > 0 && currentRecording) {
+        console.log('Audio data available:', data.size)
         sendAudioChunk(data)
       }
     },
@@ -38,14 +40,20 @@ export function ControlPanel() {
   })
 
   const handleToggle = () => {
+    const { wsConnection, wsStatus } = useStore.getState()
+    const isWsConnected = wsConnection && wsStatus === 'connected'
+
     if (isRecording) {
       // Send signal to process accumulated buffer before stopping
-      const { wsConnection, wsStatus } = useStore.getState()
-      if (wsConnection && wsStatus === 'connected') {
+      if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
       }
       stopRecording()
     } else {
+      // Signal start of a new recording to clear backend buffer
+      if (isWsConnected) {
+        wsConnection.send(JSON.stringify({ type: 'start_recording' }))
+      }
       startRecording()
     }
   }

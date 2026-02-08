@@ -82,7 +82,7 @@ async def audio_stream_websocket(
     chunk_counter = 0
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             while True:
                 # Receive message
                 message = await websocket.receive()
@@ -105,6 +105,11 @@ async def audio_stream_websocket(
                     
                     if msg_type == "ping":
                         await websocket.send_json({"type": "pong"})
+                    
+                    elif msg_type == "start_recording":
+                        logger.info("Starting new recording session, clearing buffer")
+                        audio_buffer.clear()
+                        chunk_counter = 0
                     
                     elif msg_type == "end_of_speech":
                         # Process the entire accumulated buffer
@@ -190,10 +195,10 @@ async def process_complete_transcription(
     full_response = ""
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             async with client.stream(
                 "POST",
-                f"{llm_service.url}/generate",
+                f"{llm_service.url}/generate/",
                 json={
                     "session_id": session_id,
                     "messages": context,
@@ -258,9 +263,9 @@ async def generate_tts(
         return
     
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(follow_redirects=True) as client:
             response = await client.post(
-                f"{tts_service.url}/synthesize",
+                f"{tts_service.url}/synthesize/",
                 json={
                     "session_id": session_id,
                     "text": text,
