@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     
     # CORS
     CORS_ORIGINS: List[str] = Field(
-        default=["http://localhost:3000", "http://localhost:3001"],
+        default=["*"],
         env="CORS_ORIGINS"
     )
     
@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     SESSION_TTL: int = Field(default=3600, env="SESSION_TTL")  # 1 hour
     
     # Service URLs
-    STT_SERVICE_URL: str = Field(default="http://localhost:8001", env="STT_SERVICE_URL")
-    LLM_SERVICE_URL: str = Field(default="http://localhost:8002", env="LLM_SERVICE_URL")
-    TTS_SERVICE_URL: str = Field(default="http://localhost:8003", env="TTS_SERVICE_URL")
+    STT_SERVICE_URL: str = Field(default="http://0.0.0.0:8001", env="STT_SERVICE_URL")
+    LLM_SERVICE_URL: str = Field(default="http://0.0.0.0:8002", env="LLM_SERVICE_URL")
+    TTS_SERVICE_URL: str = Field(default="http://0.0.0.0:8003", env="TTS_SERVICE_URL")
     
     # Authentication
     JWT_SECRET: str = Field(default="your-secret-key-change-in-production", env="JWT_SECRET")
