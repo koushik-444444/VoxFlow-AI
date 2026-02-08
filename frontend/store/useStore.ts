@@ -293,7 +293,10 @@ export const useStore = create<AppState>()(
       sendAudioChunk: (data) => {
         const { wsConnection, wsStatus } = get()
         if (wsConnection && wsStatus === 'connected') {
+          // console.log('Sending audio chunk:', data.size)
           wsConnection.send(data)
+        } else {
+          console.warn('Cannot send audio chunk: WebSocket not connected', wsStatus)
         }
       },
 

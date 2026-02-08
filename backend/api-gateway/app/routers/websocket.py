@@ -79,6 +79,7 @@ async def audio_stream_websocket(
     
     # Audio buffer for the current session
     audio_buffer = bytearray()
+    chunk_counter = 0
     
     try:
         async with httpx.AsyncClient() as client:
@@ -91,7 +92,11 @@ async def audio_stream_websocket(
                 
                 if "bytes" in message:
                     # Append binary audio data to buffer
-                    audio_buffer.extend(message["bytes"])
+                    chunk = message["bytes"]
+                    audio_buffer.extend(chunk)
+                    if chunk_counter % 10 == 0:  # Log every 10 chunks to avoid spam
+                        logger.debug("Received audio chunk", size=len(chunk), total_buffer=len(audio_buffer))
+                    chunk_counter += 1
                 
                 elif "text" in message:
                     # JSON control message
@@ -103,11 +108,13 @@ async def audio_stream_websocket(
                     
                     elif msg_type == "end_of_speech":
                         # Process the entire accumulated buffer
-                        if len(audio_buffer) > 0:
-                            logger.info("Processing end of speech", size=len(audio_buffer))
+                        buffer_size = len(audio_buffer)
+                        if buffer_size > 0:
+                            logger.info("Processing end of speech", size=buffer_size)
                             try:
+                                # Ensure we use the trailing slash for the STT service endpoint
                                 response = await client.post(
-                                    f"{stt_service.url}/transcribe",
+                                    f"{stt_service.url}/transcribe/",
                                     files={"audio": ("speech.webm", bytes(audio_buffer), "audio/webm")},
                                     data={
                                         "session_id": session_id,
@@ -119,6 +126,7 @@ async def audio_stream_websocket(
                                 if response.status_code == 200:
                                     result = response.json()
                                     text = result.get("text", "").strip()
+                                    logger.info("Transcription success", text=text)
                                     
                                     if text:
                                         await websocket.send_json({
@@ -130,13 +138,19 @@ async def audio_stream_websocket(
                                         await process_complete_transcription(
                                             session_id, text, websocket
                                         )
+                                else:
+                                    logger.error("STT service error", status=response.status_code, body=response.text)
+                                    await websocket.send_json({"type": "error", "message": f"STT error: {response.status_code}"})
                                 
                                 # Clear buffer after processing
                                 audio_buffer.clear()
+                                chunk_counter = 0
                                 
                             except Exception as e:
                                 logger.error("STT processing error", error=str(e))
                                 await websocket.send_json({"type": "error", "message": "Transcription failed"})
+                        else:
+                            logger.warn("Received end_of_speech but audio buffer is empty")
                         
                     elif msg_type == "interrupt":
                         audio_buffer.clear()

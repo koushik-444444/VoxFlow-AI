@@ -47,9 +47,10 @@ class WhisperEngine:
         url = "https://api.groq.com/openai/v1/audio/transcriptions"
         headers = {"Authorization": f"Bearer {settings.GROQ_API_KEY}"}
         
-        # Groq expects a file-like object
+        # Groq expects a file-like object with a valid extension
+        # We'll use .webm since that's what the gateway sends
         files = {
-            "file": ("audio.wav", audio_data, "audio/wav"),
+            "file": ("audio.webm", audio_data, "audio/webm"),
             "model": (None, settings.GROQ_MODEL),
         }
         

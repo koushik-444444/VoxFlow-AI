@@ -4,12 +4,13 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 
 interface UseAudioRecorderOptions {
   onDataAvailable?: (data: Blob) => void
+  onStop?: () => void
   onError?: (error: Error) => void
   chunkInterval?: number
 }
 
 export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
-  const { onDataAvailable, onError, chunkInterval = 100 } = options
+  const { onDataAvailable, onStop, onError, chunkInterval = 100 } = options
 
   const [isRecording, setIsRecording] = useState(false)
   const [audioLevel, setAudioLevel] = useState(0)
@@ -74,8 +75,18 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0 && onDataAvailable) {
+          // console.debug('Recorder: data available', event.data.size)
           onDataAvailable(event.data)
         }
+      }
+
+      mediaRecorder.onstart = () => {
+        console.log('MediaRecorder started')
+      }
+
+      mediaRecorder.onstop = () => {
+        console.log('MediaRecorder stopped')
+        onStop?.()
       }
 
       mediaRecorder.onerror = (event) => {
