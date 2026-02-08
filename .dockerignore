@@ -74,14 +74,9 @@ Thumbs.db
 
 # Git
 .git/
-.gitignore
 
-# Documentation
-docs/*.png
-docs/*.jpg
-docs/*.gif
+# Frontend (Excluded from Backend build)
+frontend/
 
 # Docker
-Dockerfile*
 docker-compose*.yml
-.dockerignore

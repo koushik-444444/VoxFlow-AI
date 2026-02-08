@@ -1,8 +1,8 @@
-# Unified Requirements for VoxFlow AI
+# Core Dependencies
 fastapi
 uvicorn[standard]
 websockets
-redis
+redis>=4.2.0
 httpx
 python-multipart
 pydantic>=2.0.0
@@ -14,13 +14,9 @@ structlog
 orjson
 python-dotenv
 
-# LLM & STT Dependencies
-langchain
-langchain-community
+# AI Service Dependencies (Cloud Focused)
 langchain-core
 langchain-groq
-
-# TTS Dependencies
 edge-tts
 
 # Infrastructure
