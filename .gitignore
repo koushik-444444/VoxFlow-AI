@@ -73,7 +73,7 @@ yarn-error.log*
 *.ckpt
 *.bin
 *.safetensors
-models/
+# models/  <-- Commented this out as it ignores Python model packages
 checkpoints/
 pretrained/
 
