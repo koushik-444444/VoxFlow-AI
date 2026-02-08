@@ -1,89 +1,57 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, Square, Pause, Play, Settings2 } from 'lucide-react'
+import { Mic, MicOff, Square, Settings2, RefreshCw } from 'lucide-react'
 import { useStore } from '@/store/useStore'
+import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function ControlPanel() {
   const {
-    isRecording,
-    setIsRecording,
+    isRecording: storeIsRecording,
+    setIsRecording: setStoreIsRecording,
     sendAudioChunk,
     sendInterrupt,
     wsStatus,
+    initializeSession,
+    isInitialized
   } = useStore()
 
   const [showSettings, setShowSettings] = useState(false)
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioContextRef = useRef<AudioContext | null>(null)
-  const analyserRef = useRef<AnalyserNode | null>(null)
-  const streamRef = useRef<MediaStream | null>(null)
 
-  const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-
-      // Set up audio context for visualization
-      const audioContext = new AudioContext()
-      audioContextRef.current = audioContext
-      const analyser = audioContext.createAnalyser()
-      analyser.fftSize = 256
-      analyserRef.current = analyser
-
-      const source = audioContext.createMediaStreamSource(stream)
-      source.connect(analyser)
-
-      // Set up media recorder
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus',
-      })
-      mediaRecorderRef.current = mediaRecorder
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          sendAudioChunk(event.data)
-        }
+  const {
+    isRecording,
+    startRecording,
+    stopRecording,
+    toggleRecording
+  } = useAudioRecorder({
+    onDataAvailable: (data) => {
+      if (data.size > 0) {
+        sendAudioChunk(data)
       }
-
-      mediaRecorder.start(100) // Collect 100ms chunks
-      setIsRecording(true)
-    } catch (error) {
-      console.error('Failed to start recording:', error)
-      alert('Please allow microphone access to use this feature.')
+    },
+    onError: (error) => {
+      console.error('Recorder error:', error)
+      setStoreIsRecording(false)
     }
-  }, [sendAudioChunk, setIsRecording])
+  })
 
-  const stopRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
-      mediaRecorderRef.current.stop()
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop())
-    }
-
-    if (audioContextRef.current) {
-      audioContextRef.current.close()
-    }
-
-    setIsRecording(false)
-  }, [setIsRecording])
-
-  const toggleRecording = () => {
-    if (isRecording) {
-      stopRecording()
-    } else {
-      startRecording()
-    }
+  // Synchronize store with local recorder state
+  if (isRecording !== storeIsRecording) {
+    setStoreIsRecording(isRecording)
   }
 
   const handleInterrupt = () => {
     sendInterrupt()
   }
 
+  const handleRetry = () => {
+    initializeSession()
+  }
+
   const isConnected = wsStatus === 'connected'
+  const isConnecting = wsStatus === 'connecting'
+  const hasError = wsStatus === 'error'
 
   return (
     <div className="border-t border-slate-800/50 bg-slate-900/80 backdrop-blur-xl">
@@ -94,55 +62,67 @@ export function ControlPanel() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={handleInterrupt}
-          disabled={!isConnected}
-          className="p-4 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          disabled={!isConnected || !isRecording}
+          className="p-4 rounded-full bg-slate-800/50 border border-slate-700/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
           title="Interrupt (Barge-in)"
         >
           <Square className="w-5 h-5" />
         </motion.button>
 
         {/* Record Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={toggleRecording}
-          disabled={!isConnected}
-          className={`relative p-6 rounded-full transition-all ${
-            isRecording
-              ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30'
-              : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-        >
-          <AnimatePresence mode="wait">
-            {isRecording ? (
-              <motion.div
-                key="recording"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-              >
-                <MicOff className="w-8 h-8 text-white" />
-              </motion.div>
-            ) : (
-              <motion.div
-                key="idle"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-              >
-                <Mic className="w-8 h-8 text-white" />
-              </motion.div>
-            )}
-          </AnimatePresence>
+        {hasError ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleRetry}
+            className="p-6 rounded-full bg-orange-500 hover:bg-orange-600 shadow-lg shadow-orange-500/30 text-white"
+            title="Retry Connection"
+          >
+            <RefreshCw className="w-8 h-8" />
+          </motion.button>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleRecording}
+            disabled={!isConnected}
+            className={`relative p-6 rounded-full transition-all ${
+              isRecording
+                ? 'bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30'
+                : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/30'
+            } disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
+          >
+            <AnimatePresence mode="wait">
+              {isRecording ? (
+                <motion.div
+                  key="recording"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                >
+                  <MicOff className="w-8 h-8 text-white" />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="idle"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                >
+                  <Mic className="w-8 h-8 text-white" />
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-          {/* Recording Pulse */}
-          {isRecording && (
-            <>
-              <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25" />
-              <span className="absolute -inset-2 rounded-full border-2 border-red-500/30 animate-pulse" />
-            </>
-          )}
-        </motion.button>
+            {/* Recording Pulse */}
+            {isRecording && (
+              <>
+                <span className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-25" />
+                <span className="absolute -inset-2 rounded-full border-2 border-red-500/30 animate-pulse" />
+              </>
+            )}
+          </motion.button>
+        )}
 
         {/* Settings Button */}
         <motion.button
@@ -164,10 +144,13 @@ export function ControlPanel() {
         <div className="flex items-center gap-2">
           <div
             className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-green-400 animate-pulse' : 'bg-red-400'
+              isConnected ? 'bg-green-400 animate-pulse' : 
+              isConnecting ? 'bg-yellow-400 animate-bounce' : 'bg-red-400'
             }`}
           />
-          <span>{isConnected ? 'Connected' : 'Disconnected'}</span>
+          <span className="capitalize">
+            {hasError ? 'Connection Error' : isConnecting ? 'Connecting...' : isConnected ? 'Connected' : 'Disconnected'}
+          </span>
         </div>
         <span>|</span>
         <span>{isRecording ? 'Recording...' : 'Ready'}</span>

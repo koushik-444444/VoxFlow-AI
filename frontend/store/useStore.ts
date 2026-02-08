@@ -66,8 +66,26 @@ interface AppState {
   toggleSidebar: () => void
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000'
+function formatUrls(url: string) {
+  if (!url) return ''
+  // Remove trailing slash
+  let clean = url.replace(/\/$/, '')
+  // If it's a HF spaces URL (ui version), convert to direct app version
+  if (clean.includes('huggingface.co/spaces/')) {
+    const parts = clean.split('huggingface.co/spaces/')[1].split('/')
+    const user = parts[0]
+    const space = parts[1]
+    clean = `https://${user}-${space}.hf.space`
+    console.warn('Converting HF UI URL to direct app URL:', clean)
+  }
+  return clean
+}
+
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = formatUrls(rawApiUrl)
+
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || 
+  (API_URL.startsWith('https') ? API_URL.replace('https', 'wss') : API_URL.replace('http', 'ws'))
 
 export const useStore = create<AppState>()(
   persist(
@@ -78,6 +96,7 @@ export const useStore = create<AppState>()(
 
       initializeSession: async () => {
         try {
+          console.log('Initializing session with API:', API_URL)
           const response = await fetch(`${API_URL}/api/v1/session/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -86,11 +105,16 @@ export const useStore = create<AppState>()(
 
           if (response.ok) {
             const data = await response.json()
+            console.log('Session initialized:', data.id)
             set({ sessionId: data.id, isInitialized: true })
             get().connectWebSocket()
+          } else {
+            console.error('Failed to initialize session:', response.status, response.statusText)
+            set({ wsStatus: 'error' })
           }
         } catch (error) {
           console.error('Failed to initialize session:', error)
+          set({ wsStatus: 'error' })
         }
       },
 
@@ -199,31 +223,63 @@ export const useStore = create<AppState>()(
       wsStatus: 'disconnected',
 
       connectWebSocket: () => {
-        const { sessionId } = get()
+        const { sessionId, wsConnection } = get()
         if (!sessionId) return
+        if (wsConnection && wsConnection.readyState === WebSocket.OPEN) return
 
-        const ws = new WebSocket(`${WS_URL}/ws/audio-stream?session_id=${sessionId}`)
+        console.log('Connecting to WebSocket:', WS_URL)
+        
+        try {
+          const ws = new WebSocket(`${WS_URL}/ws/audio-stream?session_id=${sessionId}`)
 
-        ws.onopen = () => {
-          set({ wsStatus: 'connected' })
-          console.log('WebSocket connected')
-        }
+          ws.onopen = () => {
+            set({ wsStatus: 'connected' })
+            console.log('WebSocket connected')
+            
+            // Start heartbeat
+            const interval = setInterval(() => {
+              if (ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'ping' }))
+              } else {
+                clearInterval(interval)
+              }
+            }, 30000)
+          }
 
-        ws.onmessage = (event) => {
-          const data = JSON.parse(event.data)
-          handleWebSocketMessage(data, get(), set)
-        }
+          ws.onmessage = (event) => {
+            try {
+              const data = JSON.parse(event.data)
+              handleWebSocketMessage(data, get(), set)
+            } catch (err) {
+              console.warn('Received non-JSON message:', event.data)
+            }
+          }
 
-        ws.onclose = () => {
-          set({ wsStatus: 'disconnected', wsConnection: null })
-        }
+          ws.onclose = (event) => {
+            console.log('WebSocket closed:', event.code, event.reason)
+            set({ wsStatus: 'disconnected', wsConnection: null })
+            
+            // Attempt to reconnect after 3 seconds if not intentionally closed
+            if (event.code !== 1000) {
+              setTimeout(() => {
+                const currentSessionId = get().sessionId
+                if (currentSessionId) {
+                  get().connectWebSocket()
+                }
+              }, 3000)
+            }
+          }
 
-        ws.onerror = (error) => {
-          console.error('WebSocket error:', error)
+          ws.onerror = (error) => {
+            console.error('WebSocket error:', error)
+            set({ wsStatus: 'error' })
+          }
+
+          set({ wsConnection: ws, wsStatus: 'connecting' })
+        } catch (err) {
+          console.error('Failed to create WebSocket:', err)
           set({ wsStatus: 'error' })
         }
-
-        set({ wsConnection: ws, wsStatus: 'connecting' })
       },
 
       disconnectWebSocket: () => {
