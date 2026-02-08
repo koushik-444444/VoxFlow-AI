@@ -10,7 +10,7 @@ import { useStore } from '@/store/useStore'
 import { Toaster } from '@/components/ui/Toaster'
 
 export default function Home() {
-  const { initializeSession, isInitialized } = useStore()
+  const { initializeSession, isInitialized, sidebarOpen, toggleSidebar } = useStore()
 
   useEffect(() => {
     if (!isInitialized) {
@@ -29,33 +29,32 @@ export default function Home() {
         <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-6 py-4 border-b border-slate-800/50 glass"
+          className="flex items-center justify-between px-8 py-6 z-10"
         >
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          <div className="flex items-center gap-4">
+            {!sidebarOpen && (
+              <button 
+                onClick={toggleSidebar}
+                className="p-3 rounded-2xl bg-vox-light border border-vox-gray text-white shadow-lg"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
-                />
-              </svg>
-            </div>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" />
+                </svg>
+              </button>
+            )}
             <div>
-              <h1 className="text-lg font-semibold gradient-text">Speech AI</h1>
-              <p className="text-xs text-slate-400">Real-time Voice Conversations</p>
+              <h1 className="text-2xl font-black tracking-tighter text-white">VoxFlow</h1>
+              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-vox-rose opacity-80">Intelligence v1.0</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <LatencyIndicator />
-            <ModelSelector />
+          <div className="flex items-center gap-3">
+            <motion.div 
+              whileHover={{ scale: 1.05 }}
+              className="px-5 py-2 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest shadow-xl cursor-pointer"
+            >
+              Try Premium
+            </motion.div>
           </div>
         </motion.header>
 

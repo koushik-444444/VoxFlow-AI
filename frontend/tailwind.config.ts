@@ -10,6 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        vox: {
+          purple: '#ac1ed6',
+          rose: '#c26e73',
+          black: '#090607',
+          gray: '#221f20',
+          light: '#2a2728',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',

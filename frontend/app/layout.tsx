@@ -1,11 +1,11 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Epilogue } from 'next/font/google'
 import './globals.css'
 
-const inter = Inter({ subsets: ['latin'] })
+const epilogue = Epilogue({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Speech AI - Real-time Voice Conversations',
+  title: 'VoxFlow - Real-time Voice Conversations',
   description: 'AI-powered speech-to-speech conversations with natural language processing',
 }
 
@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-slate-950 text-slate-100`}>
+      <body className={`${epilogue.className} bg-vox-black text-slate-100`}>
         {children}
       </body>
     </html>

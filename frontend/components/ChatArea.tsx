@@ -23,9 +23,55 @@ export function ChatArea() {
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-4 py-6 space-y-6 scroll-smooth"
+      className="flex-1 overflow-y-auto px-8 py-6 space-y-8 scroll-smooth relative z-10"
     >
       <AnimatePresence mode="popLayout">
+        {!currentConversation && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-2xl mx-auto pt-10 pb-20"
+          >
+            <h2 className="text-5xl font-black tracking-tighter text-white mb-4 leading-tight">
+              Create, explore,<br />be inspired
+            </h2>
+            
+            {/* Search Mockup from Image 1 */}
+            <div className="relative mt-8 group">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
+                <svg className="w-5 h-5 text-slate-500 group-focus-within:text-vox-purple transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                className="w-full bg-vox-gray/50 border-2 border-vox-light hover:border-vox-gray focus:border-vox-purple focus:outline-none rounded-[24px] py-5 pl-14 pr-6 text-white font-medium transition-all"
+              />
+            </div>
+
+            {/* Quick Actions from Image 1 */}
+            <div className="grid grid-cols-2 gap-4 mt-8">
+              <div className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl">
+                <p className="font-black text-xl text-white mb-10 leading-tight">AI text<br />writer</p>
+                <div className="flex justify-end">
+                  <div className="w-10 h-10 rounded-full bg-vox-light flex items-center justify-center group-hover:bg-vox-purple transition-all">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl">
+                <p className="font-black text-xl text-white mb-10 leading-tight">AI image<br />generator</p>
+                <div className="flex justify-end">
+                  <div className="w-10 h-10 rounded-full bg-vox-light flex items-center justify-center group-hover:bg-vox-purple transition-all">
+                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {currentConversation?.messages.map((message, index) => (
           <MessageBubble
             key={message.id}
@@ -41,16 +87,16 @@ export function ChatArea() {
             exit={{ opacity: 0, y: -20 }}
             className="flex items-start gap-4"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
-              <User className="w-4 h-4 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-vox-gradient flex items-center justify-center flex-shrink-0 shadow-lg shadow-vox-purple/20">
+              <User className="w-5 h-5 text-white" />
             </div>
-            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-vox-gray border border-vox-light shadow-xl">
               <div className="flex gap-1">
-                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <span className="text-sm text-slate-400 ml-2">
+              <span className="text-sm text-slate-300 font-medium">
                 {isRecording ? 'Listening...' : 'Transcribing...'}
               </span>
             </div>
@@ -63,35 +109,18 @@ export function ChatArea() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-row-reverse items-start gap-4"
           >
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-vox-light border border-vox-gray flex items-center justify-center flex-shrink-0">
+              <Bot className="w-5 h-5 text-vox-rose" />
             </div>
-            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-vox-gray border border-vox-light shadow-xl">
               <div className="flex gap-1">
-                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                <span className="w-2 h-2 bg-vox-rose rounded-full animate-pulse" />
               </div>
-              <span className="text-sm text-slate-400 ml-2">AI is thinking...</span>
+              <span className="text-sm text-slate-300 font-medium">VoxFlow is thinking...</span>
             </div>
           </motion.div>
         )}
 
-        {!currentConversation && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center h-full text-center py-20"
-          >
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500/20 to-purple-600/20 flex items-center justify-center mb-6">
-              <Bot className="w-10 h-10 text-indigo-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-200 mb-2">
-              Welcome to Speech AI
-            </h2>
-            <p className="text-slate-400 max-w-md">
-              Start a conversation by clicking the microphone button below or create a new chat.
-            </p>
-          </motion.div>
-        )}
       </AnimatePresence>
     </div>
   )
@@ -133,29 +162,29 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
     >
       {/* Avatar */}
       <div
-        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
           isUser
-            ? 'bg-gradient-to-br from-indigo-500 to-purple-600'
-            : 'bg-gradient-to-br from-emerald-500 to-teal-600'
+            ? 'bg-vox-gradient shadow-vox-purple/20'
+            : 'bg-vox-light border border-vox-gray shadow-black/40'
         }`}
       >
         {isUser ? (
-          <User className="w-4 h-4 text-white" />
+          <User className="w-5 h-5 text-white" />
         ) : (
-          <Bot className="w-4 h-4 text-white" />
+          <Bot className={`w-5 h-5 ${isUser ? 'text-white' : 'text-vox-rose'}`} />
         )}
       </div>
 
       {/* Message Content */}
       <div
-        className={`group relative max-w-[80%] px-5 py-4 rounded-2xl ${
+        className={`group relative max-w-[80%] px-6 py-4 rounded-3xl shadow-xl ${
           isUser
-            ? 'bg-gradient-to-br from-indigo-600 to-purple-600 text-white'
-            : 'bg-slate-800/80 border border-slate-700/50 text-slate-200'
+            ? 'bg-vox-gradient text-white'
+            : 'bg-vox-gray border border-vox-light text-slate-200'
         }`}
       >
         {/* Text */}
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="text-[15px] leading-relaxed whitespace-pre-wrap font-medium">
           {message.content}
           {isStreaming && (
             <span className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" />
@@ -166,11 +195,11 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
         <div
           className={`absolute ${
             isUser ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'
-          } top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 px-2`}
+          } top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 px-3`}
         >
           <button
             onClick={handleCopy}
-            className="p-1.5 rounded-lg hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 transition-colors"
+            className="p-2 rounded-xl bg-vox-gray border border-vox-light text-slate-400 hover:text-vox-purple transition-all"
             title="Copy"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
@@ -179,7 +208,7 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
           {!isUser && message.audioUrl && (
             <button
               onClick={handlePlay}
-              className="p-1.5 rounded-lg hover:bg-slate-800/80 text-slate-400 hover:text-slate-200 transition-colors"
+              className="p-2 rounded-xl bg-vox-gray border border-vox-light text-slate-400 hover:text-vox-rose transition-all"
               title="Play"
             >
               {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -189,8 +218,8 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
 
         {/* Timestamp */}
         <span
-          className={`text-xs mt-2 block ${
-            isUser ? 'text-indigo-200' : 'text-slate-500'
+          className={`text-[10px] mt-2 block font-bold uppercase tracking-wider ${
+            isUser ? 'text-white/60' : 'text-slate-500'
           }`}
         >
           {new Date(message.timestamp).toLocaleTimeString([], {

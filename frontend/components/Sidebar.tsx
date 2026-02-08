@@ -36,59 +36,59 @@ export function Sidebar() {
           className="border-r border-slate-800/50 bg-slate-900/50 backdrop-blur-xl flex flex-col"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-slate-800/50">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                <MessageSquare className="w-4 h-4 text-white" />
+          <div className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-vox-gradient flex items-center justify-center shadow-lg shadow-vox-purple/20">
+                <MessageSquare className="w-5 h-5 text-white" />
               </div>
-              <span className="font-semibold text-slate-200">Conversations</span>
+              <span className="font-black text-xl tracking-tight text-white">VoxFlow</span>
             </div>
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-lg hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition-colors"
+              className="p-2 rounded-xl bg-vox-light border border-vox-gray text-slate-400 hover:text-white transition-all shadow-md"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
           </div>
 
           {/* New Conversation Button */}
-          <div className="p-4">
+          <div className="px-6 pb-4">
             <button
               onClick={createConversation}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium transition-all shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30"
+              className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-vox-gradient hover:opacity-90 text-white font-bold transition-all shadow-xl shadow-vox-purple/20"
             >
-              <Plus className="w-5 h-5" />
-              New Conversation
+              <Plus className="w-6 h-6" />
+              New Session
             </button>
           </div>
 
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto px-3 pb-4 space-y-1">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
             {conversations.map((conversation) => (
               <motion.div
                 key={conversation.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className={`group relative flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all ${
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`group relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
                   currentConversationId === conversation.id
-                    ? 'bg-indigo-500/20 border border-indigo-500/30'
-                    : 'hover:bg-slate-800/50 border border-transparent'
+                    ? 'bg-vox-gray border-vox-purple/50 shadow-lg'
+                    : 'bg-vox-light/40 border-transparent hover:bg-vox-light/80 hover:border-vox-gray'
                 }`}
                 onClick={() => setCurrentConversation(conversation.id)}
               >
                 <div
-                  className={`w-2 h-2 rounded-full ${
+                  className={`w-1.5 h-8 rounded-full ${
                     currentConversationId === conversation.id
-                      ? 'bg-indigo-400'
-                      : 'bg-slate-600'
+                      ? 'bg-vox-purple shadow-[0_0_10px_#ac1ed6]'
+                      : 'bg-vox-gray'
                   }`}
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-slate-200 truncate">
+                  <p className="text-[15px] font-bold text-slate-100 truncate">
                     {conversation.title}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    {format(new Date(conversation.updatedAt), 'MMM d, h:mm a')}
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
+                    {format(new Date(conversation.updatedAt), 'MMM d • HH:mm')}
                   </p>
                 </div>
 
@@ -126,10 +126,12 @@ export function Sidebar() {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-slate-800/50">
-            <button className="flex items-center gap-3 w-full p-3 rounded-xl hover:bg-slate-800/50 text-slate-400 hover:text-slate-200 transition-colors">
-              <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">Settings</span>
+          <div className="p-6">
+            <button className="flex items-center gap-4 w-full p-4 rounded-2xl bg-vox-light/30 hover:bg-vox-light text-slate-400 hover:text-white transition-all border border-transparent hover:border-vox-gray">
+              <div className="w-10 h-10 rounded-xl bg-vox-gray flex items-center justify-center">
+                <Settings className="w-5 h-5 text-slate-300" />
+              </div>
+              <span className="text-sm font-bold">Settings</span>
             </button>
           </div>
         </motion.aside>
