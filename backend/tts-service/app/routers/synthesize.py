@@ -20,15 +20,6 @@ class SynthesizeRequest(BaseModel):
     format: str = "wav"
 
 
-class SynthesizeResponse(BaseModel):
-    """Synthesis response."""
-    session_id: str
-    audio_data: bytes
-    format: str
-    duration_ms: Optional[float]
-    latency_ms: float
-
-
 @router.post("/")
 async def synthesize(request: SynthesizeRequest):
     """Synthesize text to speech."""
@@ -47,12 +38,14 @@ async def synthesize(request: SynthesizeRequest):
             latency_ms=result["latency_ms"],
         )
         
-        return SynthesizeResponse(
-            session_id=request.session_id,
-            audio_data=result["audio_data"],
-            format=result["format"],
-            duration_ms=result["duration_ms"],
-            latency_ms=result["latency_ms"],
+        return Response(
+            content=result["audio_data"],
+            media_type="audio/wav",
+            headers={
+                "X-Session-ID": request.session_id,
+                "X-Duration-Ms": str(result.get("duration_ms", "")),
+                "X-Latency-Ms": str(result["latency_ms"]),
+            },
         )
         
     except Exception as e:
