@@ -10,11 +10,12 @@ This repository is a Speech-to-Speech AI platform designed to run as a monolith 
 - **Run Monolith**: `make up`
 
 ### Backend (Python - FastAPI)
-The project runs 4 services in one container: `api-gateway` (port 7860), `stt-service` (8001), `llm-service` (8002), `tts-service` (8003).
-- **Lint**: `flake8 [service-dir] --max-line-length 100` (or `make lint`)
-- **Format**: `black [service-dir] --line-length 100` (or `make format`)
-- **Run Tests**: `pytest` inside the service directory (or `make test`)
-- **Add Dependency**: Add to `requirements_all.txt` and run `pip install -r requirements_all.txt`
+The project runs 4 services in one container via `backend/supervisord.conf`: `api-gateway` (port 7860), `stt-service` (8001), `llm-service` (8002), `tts-service` (8003).
+- **Lint**: `flake8 backend/[service-dir] --max-line-length 100`
+- **Format**: `black backend/ --line-length 100`
+- **Run Tests**: `pytest backend/[service-dir]`
+- **Add Dependency**: Add to `backend/requirements_all.txt`
+
 
 ### Frontend (Next.js - TypeScript)
 - **Install**: `npm install`
@@ -46,10 +47,9 @@ The project runs 4 services in one container: `api-gateway` (port 7860), `stt-se
 
 ## 🏗 Architecture Principles
 
-- **Monolith Container**: All backend services run in one container using `supervisord.conf`.
-- **Internal Communication**: Services talk via `localhost` (e.g., `http://localhost:8001`).
+- **Monolith Container**: All backend services run in one container using `backend/supervisord.conf`.
 - **Statelessness**: Services are stateless. Use **Upstash Redis** for session data.
-- **Environment**: Configuration via environment variables in `app/config.py` (Python) or `.env` (Frontend).
+- **Environment**: Configuration via environment variables in `backend/api-gateway/app/config.py`, etc.
 
 ## 📝 Commit Guidelines
 
@@ -59,9 +59,9 @@ The project runs 4 services in one container: `api-gateway` (port 7860), `stt-se
 
 ## 🔍 Search & Exploration Tips
 
-- Review `supervisord.conf` to see how services are started.
-- Review `api-gateway/app/main.py` for central routing.
-- Check `api-gateway/app/services/service_registry.py` for internal service URLs.
+- Review `backend/supervisord.conf` to see how services are started.
+- Review `backend/api-gateway/app/main.py` for central routing.
+- Check `backend/api-gateway/app/services/service_registry.py` for internal service URLs.
 
 ---
 

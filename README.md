@@ -37,4 +37,12 @@ A high-performance, real-time speech-to-speech AI platform optimized for Hugging
    - `NEXT_PUBLIC_WS_URL`: Your HF Space URL (wss).
 
 ---
+
+## 📂 Project Structure
+- **`frontend/`**: Next.js 14 web application.
+- **`backend/`**: Python microservices (Gateway, STT, LLM, TTS) consolidated for monolith deployment.
+- **`Dockerfile`**: Root Docker configuration for Hugging Face Spaces.
+- **`supervisord.conf`**: Process manager configuration for the backend monolith.
+
+---
 *This Space runs a FastAPI monolith managed by supervisord.*

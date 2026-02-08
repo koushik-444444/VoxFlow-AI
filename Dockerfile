@@ -18,15 +18,15 @@ WORKDIR /app
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Copy and install consolidated requirements
-COPY requirements_all.txt .
+COPY backend/requirements_all.txt requirements_all.txt
 RUN pip install --no-cache-dir -r requirements_all.txt
 
 # Copy backend services
-COPY api-gateway/ api-gateway/
-COPY stt-service/ stt-service/
-COPY llm-service/ llm-service/
-COPY tts-service/ tts-service/
-COPY supervisord.conf .
+COPY backend/api-gateway/ api-gateway/
+COPY backend/stt-service/ stt-service/
+COPY backend/llm-service/ llm-service/
+COPY backend/tts-service/ tts-service/
+COPY backend/supervisord.conf .
 
 # Hugging Face Spaces port
 EXPOSE 7860
