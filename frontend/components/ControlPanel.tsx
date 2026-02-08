@@ -65,45 +65,6 @@ export function ControlPanel() {
     }
   }
 
-    },
-    onError: (error) => {
-      console.error('Recorder error:', error)
-      setStoreIsRecording(false)
-    }
-  })
-
-  const handleToggle = () => {
-    const { wsConnection, wsStatus } = useStore.getState()
-    const isWsConnected = wsConnection && wsStatus === 'connected'
-
-    if (isRecording) {
-      // Send signal to process accumulated buffer before stopping
-      if (isWsConnected) {
-        wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
-      }
-      stopRecording()
-    } else {
-      // Signal start of a new recording to clear backend buffer
-      if (isWsConnected) {
-        wsConnection.send(JSON.stringify({ type: 'start_recording' }))
-      }
-      startRecording()
-    }
-  }
-
-  // Synchronize store with local recorder state
-  if (isRecording !== storeIsRecording) {
-    setStoreIsRecording(isRecording)
-  }
-
-  const handleInterrupt = () => {
-    sendInterrupt()
-  }
-
-  const handleRetry = () => {
-    initializeSession()
-  }
-
   const handleInterrupt = () => {
     sendInterrupt()
   }
@@ -216,7 +177,7 @@ export function ControlPanel() {
           </span>
         </div>
         <span>|</span>
-        <span>{isRecording ? 'Recording...' : 'Ready'}</span>
+        <span>{isTranscribing ? 'Transcribing...' : isRecording ? 'Recording...' : 'Ready'}</span>
       </div>
 
       {/* Settings Panel */}

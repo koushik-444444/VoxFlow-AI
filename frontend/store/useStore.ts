@@ -327,6 +327,7 @@ export const useStore = create<AppState>()(
       sidebarOpen: true,
       isTranscribing: false,
       assistantIsThinking: false,
+
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setIsTranscribing: (value) => set({ isTranscribing: value }),
       setAssistantIsThinking: (value) => set({ assistantIsThinking: value }),
