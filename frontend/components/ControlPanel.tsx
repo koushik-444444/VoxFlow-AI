@@ -14,6 +14,7 @@ export function ControlPanel() {
     sendInterrupt,
     wsStatus,
     initializeSession,
+    isTranscribing,
     setIsTranscribing
   } = useStore()
 
