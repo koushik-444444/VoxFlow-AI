@@ -7,7 +7,7 @@ import { useStore } from '@/store/useStore'
 import { useState } from 'react'
 
 export function ChatArea() {
-  const { conversations, currentConversationId, isRecording } = useStore()
+  const { conversations, currentConversationId, isRecording, isTranscribing, assistantIsThinking } = useStore()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const currentConversation = conversations.find(
@@ -18,7 +18,7 @@ export function ChatArea() {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight
     }
-  }, [currentConversation?.messages])
+  }, [currentConversation?.messages, isRecording, isTranscribing, assistantIsThinking])
 
   return (
     <div
@@ -34,7 +34,7 @@ export function ChatArea() {
           />
         ))}
 
-        {isRecording && (
+        {(isRecording || isTranscribing) && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -50,7 +50,27 @@ export function ChatArea() {
                 <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                 <span className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
               </div>
-              <span className="text-sm text-slate-400 ml-2">Listening...</span>
+              <span className="text-sm text-slate-400 ml-2">
+                {isRecording ? 'Listening...' : 'Transcribing...'}
+              </span>
+            </div>
+          </motion.div>
+        )}
+
+        {assistantIsThinking && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-row-reverse items-start gap-4"
+          >
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center flex-shrink-0">
+              <Bot className="w-4 h-4 text-white" />
+            </div>
+            <div className="flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/50 border border-slate-700/50">
+              <div className="flex gap-1">
+                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+              </div>
+              <span className="text-sm text-slate-400 ml-2">AI is thinking...</span>
             </div>
           </motion.div>
         )}

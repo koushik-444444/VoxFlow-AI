@@ -63,8 +63,13 @@ interface AppState {
 
   // UI
   sidebarOpen: boolean
+  isTranscribing: boolean
+  assistantIsThinking: boolean
   toggleSidebar: () => void
+  setIsTranscribing: (value: boolean) => void
+  setAssistantIsThinking: (value: boolean) => void
 }
+
 
 function formatUrls(url: string) {
   if (!url) return ''
@@ -320,7 +325,11 @@ export const useStore = create<AppState>()(
 
       // UI
       sidebarOpen: true,
+      isTranscribing: false,
+      assistantIsThinking: false,
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
+      setIsTranscribing: (value) => set({ isTranscribing: value }),
+      setAssistantIsThinking: (value) => set({ assistantIsThinking: value }),
     }),
     {
       name: 'speech-ai-storage',
@@ -340,11 +349,10 @@ function handleWebSocketMessage(
 ) {
   switch (data.type) {
     case 'transcription':
-      // Handle partial transcription
-      if (data.is_partial) {
-        // Update UI with partial transcript
-      } else {
-        // Final transcription - add to messages
+      // Final transcription - add to messages
+      if (!data.is_partial) {
+        state.setIsTranscribing(false)
+        state.setAssistantIsThinking(true)
         state.addMessage({
           role: 'user',
           content: data.text,
@@ -355,6 +363,7 @@ function handleWebSocketMessage(
     case 'llm_chunk':
       // Handle streaming LLM response
       if (data.is_final) {
+        state.setAssistantIsThinking(false)
         state.addMessage({
           role: 'assistant',
           content: data.full_response,
@@ -365,24 +374,31 @@ function handleWebSocketMessage(
     case 'tts_audio':
       // Handle TTS audio
       if (data.audio) {
-        const audioBlob = new Blob(
-          [Uint8Array.from(atob(data.audio), (c) => c.charCodeAt(0))],
-          { type: 'audio/wav' }
-        )
-        const audioUrl = URL.createObjectURL(audioBlob)
-        const audio = new Audio(audioUrl)
-        audio.play()
-        state.setIsPlaying(true)
-        audio.onended = () => state.setIsPlaying(false)
+        try {
+          const binaryString = atob(data.audio)
+          const bytes = new Uint8Array(binaryString.length)
+          for (let i = 0; i < binaryString.length; i++) {
+            bytes[i] = binaryString.charCodeAt(i)
+          }
+          const audioBlob = new Blob([bytes], { type: 'audio/wav' })
+          const audioUrl = URL.createObjectURL(audioBlob)
+          const audio = new Audio(audioUrl)
+          audio.play().catch(err => console.warn('Audio playback blocked:', err))
+          state.setIsPlaying(true)
+          audio.onended = () => {
+            state.setIsPlaying(false)
+            URL.revokeObjectURL(audioUrl)
+          }
+        } catch (err) {
+          console.error('Error playing audio:', err)
+        }
       }
       break
 
     case 'error':
-      console.error('WebSocket error:', data.message)
-      break
-
-    case 'pong':
-      // Heartbeat response
+      console.error('WebSocket message error:', data.message)
+      state.setIsTranscribing(false)
+      state.setAssistantIsThinking(false)
       break
   }
 }

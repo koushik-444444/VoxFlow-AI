@@ -14,7 +14,7 @@ export function ControlPanel() {
     sendInterrupt,
     wsStatus,
     initializeSession,
-    isInitialized
+    setIsTranscribing
   } = useStore()
 
   const [showSettings, setShowSettings] = useState(false)
@@ -23,15 +23,48 @@ export function ControlPanel() {
     isRecording,
     startRecording,
     stopRecording,
-    toggleRecording
   } = useAudioRecorder({
     onDataAvailable: (data) => {
-      // ONLY send data if we are in the recording state
-      const { isRecording: currentRecording } = useStore.getState()
-      if (data.size > 0 && currentRecording) {
-        console.log('Audio data available:', data.size)
+      // Send data regardless of state during the short window of stopping
+      if (data.size > 0) {
+        // console.log('Audio data available:', data.size)
         sendAudioChunk(data)
       }
+    },
+    onError: (error) => {
+      console.error('Recorder error:', error)
+      setStoreIsRecording(false)
+    }
+  })
+
+  // Synchronize store with local recorder state
+  if (isRecording !== storeIsRecording) {
+    setStoreIsRecording(isRecording)
+  }
+
+  const handleToggle = () => {
+    const { wsConnection, wsStatus } = useStore.getState()
+    const isWsConnected = wsConnection && wsStatus === 'connected'
+
+    if (isRecording) {
+      stopRecording()
+      setIsTranscribing(true)
+      
+      // Wait a tiny bit for the last data chunk to be emitted and sent
+      setTimeout(() => {
+        if (isWsConnected) {
+          wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
+        }
+      }, 200)
+    } else {
+      // Signal start of a new recording to clear backend buffer
+      if (isWsConnected) {
+        wsConnection.send(JSON.stringify({ type: 'start_recording' }))
+      }
+      startRecording()
+    }
+  }
+
     },
     onError: (error) => {
       console.error('Recorder error:', error)
@@ -61,6 +94,14 @@ export function ControlPanel() {
   // Synchronize store with local recorder state
   if (isRecording !== storeIsRecording) {
     setStoreIsRecording(isRecording)
+  }
+
+  const handleInterrupt = () => {
+    sendInterrupt()
+  }
+
+  const handleRetry = () => {
+    initializeSession()
   }
 
   const handleInterrupt = () => {

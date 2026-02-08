@@ -125,7 +125,7 @@ async def audio_stream_websocket(
                                         "session_id": session_id,
                                         "is_partial": False,
                                     },
-                                    timeout=30.0,
+                                    timeout=60.0,
                                 )
                                 
                                 if response.status_code == 200:
@@ -143,17 +143,23 @@ async def audio_stream_websocket(
                                         await process_complete_transcription(
                                             session_id, text, websocket
                                         )
+                                    else:
+                                        logger.warn("Transcription returned empty text")
+                                        await websocket.send_json({
+                                            "type": "error",
+                                            "message": "Could not understand audio",
+                                        })
                                 else:
                                     logger.error("STT service error", status=response.status_code, body=response.text)
                                     await websocket.send_json({"type": "error", "message": f"STT error: {response.status_code}"})
                                 
-                                # Clear buffer after processing
-                                audio_buffer.clear()
-                                chunk_counter = 0
-                                
                             except Exception as e:
                                 logger.error("STT processing error", error=str(e))
                                 await websocket.send_json({"type": "error", "message": "Transcription failed"})
+                            finally:
+                                # ALWAYS clear buffer after an attempt to process end of speech
+                                audio_buffer.clear()
+                                chunk_counter = 0
                         else:
                             logger.warn("Received end_of_speech but audio buffer is empty")
                         
