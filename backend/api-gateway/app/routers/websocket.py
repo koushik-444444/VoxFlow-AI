@@ -77,60 +77,21 @@ async def audio_stream_websocket(
         await websocket.close(code=4002, reason="STT service unavailable")
         return
     
+    # Audio buffer for the current session
+    audio_buffer = bytearray()
+    
     try:
         async with httpx.AsyncClient() as client:
-            chunk_counter = 0
-            
             while True:
-                # Receive audio chunk
+                # Receive message
                 message = await websocket.receive()
                 
                 if message["type"] == "websocket.disconnect":
                     break
                 
                 if "bytes" in message:
-                    # Binary audio data
-                    audio_data = message["bytes"]
-                    chunk_counter += 1
-                    
-                    # Forward to STT service
-                    try:
-                        response = await client.post(
-                            f"{stt_service.url}/transcribe",
-                            files={"audio": ("chunk.webm", audio_data, "audio/webm")},
-                            data={
-                                "session_id": session_id,
-                                "chunk_id": chunk_counter,
-                            },
-                            timeout=5.0,
-                        )
-                        
-                        if response.status_code == 200:
-                            result = response.json()
-                            
-                            # Send transcription back to client
-                            await websocket.send_json({
-                                "type": "transcription",
-                                "text": result.get("text", ""),
-                                "is_partial": result.get("is_partial", True),
-                                "confidence": result.get("confidence"),
-                                "latency_ms": result.get("latency_ms"),
-                            })
-                            
-                            # If final transcription, forward to LLM
-                            if not result.get("is_partial", True) and result.get("text"):
-                                await process_complete_transcription(
-                                    session_id,
-                                    result["text"],
-                                    websocket,
-                                )
-                                
-                    except Exception as e:
-                        logger.error("STT processing error", error=str(e))
-                        await websocket.send_json({
-                            "type": "error",
-                            "message": "Transcription failed",
-                        })
+                    # Append binary audio data to buffer
+                    audio_buffer.extend(message["bytes"])
                 
                 elif "text" in message:
                     # JSON control message
@@ -140,9 +101,45 @@ async def audio_stream_websocket(
                     if msg_type == "ping":
                         await websocket.send_json({"type": "pong"})
                     
+                    elif msg_type == "end_of_speech":
+                        # Process the entire accumulated buffer
+                        if len(audio_buffer) > 0:
+                            logger.info("Processing end of speech", size=len(audio_buffer))
+                            try:
+                                response = await client.post(
+                                    f"{stt_service.url}/transcribe",
+                                    files={"audio": ("speech.webm", bytes(audio_buffer), "audio/webm")},
+                                    data={
+                                        "session_id": session_id,
+                                        "is_partial": False,
+                                    },
+                                    timeout=30.0,
+                                )
+                                
+                                if response.status_code == 200:
+                                    result = response.json()
+                                    text = result.get("text", "").strip()
+                                    
+                                    if text:
+                                        await websocket.send_json({
+                                            "type": "transcription",
+                                            "text": text,
+                                            "is_partial": False,
+                                        })
+                                        # Forward to LLM
+                                        await process_complete_transcription(
+                                            session_id, text, websocket
+                                        )
+                                
+                                # Clear buffer after processing
+                                audio_buffer.clear()
+                                
+                            except Exception as e:
+                                logger.error("STT processing error", error=str(e))
+                                await websocket.send_json({"type": "error", "message": "Transcription failed"})
+                        
                     elif msg_type == "interrupt":
-                        # Handle barge-in
-                        await handle_interrupt(session_id)
+                        audio_buffer.clear()
                         await websocket.send_json({"type": "interrupted"})
     
     except WebSocketDisconnect:

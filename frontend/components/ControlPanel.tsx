@@ -26,6 +26,7 @@ export function ControlPanel() {
     toggleRecording
   } = useAudioRecorder({
     onDataAvailable: (data) => {
+      console.log('Audio data available:', data.size)
       if (data.size > 0) {
         sendAudioChunk(data)
       }
@@ -35,6 +36,19 @@ export function ControlPanel() {
       setStoreIsRecording(false)
     }
   })
+
+  const handleToggle = () => {
+    if (isRecording) {
+      // Send signal to process accumulated buffer before stopping
+      const { wsConnection, wsStatus } = useStore.getState()
+      if (wsConnection && wsStatus === 'connected') {
+        wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
+      }
+      stopRecording()
+    } else {
+      startRecording()
+    }
+  }
 
   // Synchronize store with local recorder state
   if (isRecording !== storeIsRecording) {
@@ -84,7 +98,7 @@ export function ControlPanel() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={toggleRecording}
+            onClick={handleToggle}
             disabled={!isConnected}
             className={`relative p-6 rounded-full transition-all ${
               isRecording
