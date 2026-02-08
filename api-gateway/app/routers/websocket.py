@@ -1,0 +1,288 @@
+"""WebSocket endpoints for real-time communication."""
+import asyncio
+import base64
+import json
+from typing import Dict, Optional
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, HTTPException
+import httpx
+import structlog
+
+from app.config import settings
+from app.services.session_manager import session_manager
+from app.services.service_registry import service_registry
+
+logger = structlog.get_logger()
+router = APIRouter()
+
+
+class ConnectionManager:
+    """Manage WebSocket connections."""
+    
+    def __init__(self):
+        self._connections: Dict[str, WebSocket] = {}
+    
+    async def connect(self, session_id: str, websocket: WebSocket):
+        """Accept and store connection."""
+        await websocket.accept()
+        self._connections[session_id] = websocket
+        logger.info("WebSocket connected", session_id=session_id)
+    
+    def disconnect(self, session_id: str):
+        """Remove connection."""
+        if session_id in self._connections:
+            del self._connections[session_id]
+            logger.info("WebSocket disconnected", session_id=session_id)
+    
+    async def send_message(self, session_id: str, message: dict):
+        """Send message to specific session."""
+        if session_id in self._connections:
+            await self._connections[session_id].send_json(message)
+    
+    async def broadcast(self, message: dict):
+        """Broadcast to all connections."""
+        for session_id, ws in self._connections.items():
+            try:
+                await ws.send_json(message)
+            except Exception as e:
+                logger.error(
+                    "Failed to broadcast",
+                    session_id=session_id,
+                    error=str(e),
+                )
+
+
+manager = ConnectionManager()
+
+
+@router.websocket("/audio-stream")
+async def audio_stream_websocket(
+    websocket: WebSocket,
+    session_id: str = Query(...),
+    token: Optional[str] = Query(None),
+):
+    """WebSocket endpoint for real-time audio streaming."""
+    
+    # Validate session
+    session = await session_manager.get_session(session_id)
+    if not session:
+        await websocket.close(code=4001, reason="Invalid session")
+        return
+    
+    await manager.connect(session_id, websocket)
+    
+    # Get STT service
+    stt_service = service_registry.get_healthy_service("stt")
+    if not stt_service:
+        await websocket.close(code=4002, reason="STT service unavailable")
+        return
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            chunk_counter = 0
+            
+            while True:
+                # Receive audio chunk
+                message = await websocket.receive()
+                
+                if message["type"] == "websocket.disconnect":
+                    break
+                
+                if "bytes" in message:
+                    # Binary audio data
+                    audio_data = message["bytes"]
+                    chunk_counter += 1
+                    
+                    # Forward to STT service
+                    try:
+                        response = await client.post(
+                            f"{stt_service.url}/transcribe",
+                            files={"audio": ("chunk.webm", audio_data, "audio/webm")},
+                            data={
+                                "session_id": session_id,
+                                "chunk_id": chunk_counter,
+                            },
+                            timeout=5.0,
+                        )
+                        
+                        if response.status_code == 200:
+                            result = response.json()
+                            
+                            # Send transcription back to client
+                            await websocket.send_json({
+                                "type": "transcription",
+                                "text": result.get("text", ""),
+                                "is_partial": result.get("is_partial", True),
+                                "confidence": result.get("confidence"),
+                                "latency_ms": result.get("latency_ms"),
+                            })
+                            
+                            # If final transcription, forward to LLM
+                            if not result.get("is_partial", True) and result.get("text"):
+                                await process_complete_transcription(
+                                    session_id,
+                                    result["text"],
+                                    websocket,
+                                )
+                                
+                    except Exception as e:
+                        logger.error("STT processing error", error=str(e))
+                        await websocket.send_json({
+                            "type": "error",
+                            "message": "Transcription failed",
+                        })
+                
+                elif "text" in message:
+                    # JSON control message
+                    data = json.loads(message["text"])
+                    msg_type = data.get("type")
+                    
+                    if msg_type == "ping":
+                        await websocket.send_json({"type": "pong"})
+                    
+                    elif msg_type == "interrupt":
+                        # Handle barge-in
+                        await handle_interrupt(session_id)
+                        await websocket.send_json({"type": "interrupted"})
+    
+    except WebSocketDisconnect:
+        logger.info("Client disconnected", session_id=session_id)
+    except Exception as e:
+        logger.error("WebSocket error", session_id=session_id, error=str(e))
+    finally:
+        manager.disconnect(session_id)
+
+
+async def process_complete_transcription(
+    session_id: str,
+    text: str,
+    websocket: WebSocket,
+):
+    """Process complete transcription through LLM and TTS."""
+    
+    # Add user message to session
+    await session_manager.add_message(session_id, "user", text)
+    
+    # Get conversation context
+    context = await session_manager.get_conversation_context(session_id)
+    
+    # Get LLM service
+    llm_service = service_registry.get_healthy_service("llm")
+    if not llm_service:
+        await websocket.send_json({
+            "type": "error",
+            "message": "LLM service unavailable",
+        })
+        return
+    
+    # Stream LLM response
+    full_response = ""
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            async with client.stream(
+                "POST",
+                f"{llm_service.url}/generate",
+                json={
+                    "session_id": session_id,
+                    "messages": context,
+                    "stream": True,
+                },
+                timeout=60.0,
+            ) as response:
+                
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        data = json.loads(line[6:])
+                        
+                        if data.get("chunk"):
+                            chunk = data["chunk"]
+                            full_response += chunk
+                            
+                            # Stream to client
+                            await websocket.send_json({
+                                "type": "llm_chunk",
+                                "content": chunk,
+                                "is_final": False,
+                            })
+                        
+                        if data.get("done"):
+                            break
+        
+        # Send final message
+        await websocket.send_json({
+            "type": "llm_chunk",
+            "content": "",
+            "is_final": True,
+            "full_response": full_response,
+        })
+        
+        # Add assistant message to session
+        await session_manager.add_message(session_id, "assistant", full_response)
+        
+        # Generate TTS
+        await generate_tts(session_id, full_response, websocket)
+        
+    except Exception as e:
+        logger.error("LLM processing error", error=str(e))
+        await websocket.send_json({
+            "type": "error",
+            "message": "LLM processing failed",
+        })
+
+
+async def generate_tts(
+    session_id: str,
+    text: str,
+    websocket: WebSocket,
+):
+    """Generate TTS and send to client."""
+    
+    tts_service = service_registry.get_healthy_service("tts")
+    if not tts_service:
+        await websocket.send_json({
+            "type": "error",
+            "message": "TTS service unavailable",
+        })
+        return
+    
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{tts_service.url}/synthesize",
+                json={
+                    "session_id": session_id,
+                    "text": text,
+                    "voice_id": "default",
+                },
+                timeout=30.0,
+            )
+            
+            if response.status_code == 200:
+                # Encode audio as base64 for WebSocket transmission
+                audio_base64 = base64.b64encode(response.content).decode("utf-8")
+                
+                await websocket.send_json({
+                    "type": "tts_audio",
+                    "audio": audio_base64,
+                    "format": "wav",
+                })
+            else:
+                await websocket.send_json({
+                    "type": "error",
+                    "message": "TTS generation failed",
+                })
+                
+    except Exception as e:
+        logger.error("TTS processing error", error=str(e))
+        await websocket.send_json({
+            "type": "error",
+            "message": "TTS processing failed",
+        })
+
+
+async def handle_interrupt(session_id: str):
+    """Handle user interrupt (barge-in)."""
+    logger.info("Handling interrupt", session_id=session_id)
+    # Cancel any ongoing TTS/LLM operations
+    # This would integrate with a task cancellation system
