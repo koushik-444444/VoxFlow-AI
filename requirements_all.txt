@@ -11,11 +11,9 @@ python-jose[cryptography]
 passlib[bcrypt]
 prometheus-client
 structlog
-orjson
 python-dotenv
 
 # AI Service Dependencies (Cloud Focused)
-langchain-core
 langchain-groq
 edge-tts
 
