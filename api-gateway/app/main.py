@@ -22,7 +22,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan manager."""
     # Startup
-    logger.info("Starting API Gateway", version=__version__)
+    logger.info("Starting API Gateway", version="1.0.0")
     
     # Initialize Redis connection
     await redis_client.connect()

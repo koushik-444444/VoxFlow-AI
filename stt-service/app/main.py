@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan manager."""
     # Startup
-    logger.info("Starting STT Service", version=__version__)
+    logger.info("Starting STT Service", version="1.0.0")
     
     # Load Whisper model
     logger.info("Loading Whisper model", model=settings.WHISPER_MODEL)

@@ -1,7 +1,7 @@
 """Redis client for session management."""
 import json
 from typing import Optional, Dict, Any
-import aioredis
+import redis.asyncio as redis
 import structlog
 
 from app.config import settings
@@ -13,13 +13,13 @@ class RedisClient:
     """Async Redis client wrapper."""
     
     def __init__(self):
-        self._client: Optional[aioredis.Redis] = None
+        self._client: Optional[redis.Redis] = None
         self._url = settings.REDIS_URL
     
     async def connect(self) -> None:
         """Establish Redis connection."""
         try:
-            self._client = aioredis.from_url(
+            self._client = redis.from_url(
                 self._url,
                 encoding="utf-8",
                 decode_responses=True,

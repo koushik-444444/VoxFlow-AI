@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan manager."""
     # Startup
-    logger.info("Starting TTS Service", version=__version__)
+    logger.info("Starting TTS Service", version="1.0.0")
     
     # Initialize TTS engine
     logger.info("Initializing TTS engine", model=settings.TTS_MODEL)

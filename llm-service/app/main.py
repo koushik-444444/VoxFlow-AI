@@ -17,7 +17,7 @@ logger = structlog.get_logger()
 async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan manager."""
     # Startup
-    logger.info("Starting LLM Service", version=__version__)
+    logger.info("Starting LLM Service", version="1.0.0")
     
     # Initialize LLM engine
     logger.info("Initializing LLM engine", provider=settings.LLM_PROVIDER)
