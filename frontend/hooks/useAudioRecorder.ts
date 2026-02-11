@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
+import { useStore } from '@/store/useStore'
 
 interface UseAudioRecorderOptions {
   onDataAvailable?: (data: Blob) => void
@@ -12,20 +13,17 @@ interface UseAudioRecorderOptions {
 export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
   const { onDataAvailable, onStop, onError, chunkInterval = 100 } = options
 
-  const [isRecording, setIsRecording] = useState(false)
-  const [audioLevel, setAudioLevel] = useState(0)
-  const [error, setError] = useState<Error | null>(null)
-
+  const { isRecording, setIsRecording, setAudioLevel } = useStore()
+  
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioContextRef = useRef<AudioContext | null>(null)
   const analyserRef = useRef<AnalyserNode | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationFrameRef = useRef<number>()
+  const lastLevelUpdateRef = useRef<number>(0)
 
   const startRecording = useCallback(async () => {
     try {
-      setError(null)
-
       // Get microphone access
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -55,7 +53,14 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
         analyser.getByteFrequencyData(dataArray)
         const average = dataArray.reduce((a, b) => a + b) / dataArray.length
         const normalized = Math.min(average / 128, 1)
-        setAudioLevel(normalized)
+        
+        // Throttle store updates to 30fps (approx 33ms) to prevent UI lag
+        const now = Date.now()
+        if (now - lastLevelUpdateRef.current > 33) {
+          setAudioLevel(normalized)
+          lastLevelUpdateRef.current = now
+        }
+        
         animationFrameRef.current = requestAnimationFrame(monitorAudioLevel)
       }
       monitorAudioLevel()
@@ -75,7 +80,6 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0 && onDataAvailable) {
-          // console.debug('Recorder: data available', event.data.size)
           onDataAvailable(event.data)
         }
       }
@@ -91,8 +95,8 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
       mediaRecorder.onerror = (event) => {
         const err = new Error('MediaRecorder error')
-        setError(err)
         onError?.(err)
+        setIsRecording(false)
       }
 
       // Start recording with chunks
@@ -100,10 +104,10 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
       setIsRecording(true)
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to start recording')
-      setError(error)
       onError?.(error)
+      setIsRecording(false)
     }
-  }, [onDataAvailable, onError, chunkInterval])
+  }, [onDataAvailable, onStop, onError, chunkInterval, setIsRecording, setAudioLevel])
 
   const stopRecording = useCallback(() => {
     // Stop media recorder
@@ -114,21 +118,24 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
     // Stop all tracks
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop())
+      streamRef.current = null
     }
 
     // Close audio context
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close()
+      audioContextRef.current = null
     }
 
     // Cancel animation frame
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
+      animationFrameRef.current = undefined
     }
 
     setIsRecording(false)
     setAudioLevel(0)
-  }, [])
+  }, [setIsRecording, setAudioLevel])
 
   const toggleRecording = useCallback(() => {
     if (isRecording) {
@@ -147,8 +154,6 @@ export function useAudioRecorder(options: UseAudioRecorderOptions = {}) {
 
   return {
     isRecording,
-    audioLevel,
-    error,
     startRecording,
     stopRecording,
     toggleRecording,

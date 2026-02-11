@@ -23,8 +23,7 @@ export function TextWriterView() {
     setService, 
     writerContent, 
     setWriterContent,
-    isRecording: storeIsRecording,
-    setIsRecording: setStoreIsRecording,
+    isRecording,
     isTranscribing,
     setIsTranscribing,
     assistantIsThinking,
@@ -36,7 +35,6 @@ export function TextWriterView() {
   const [copied, setCopied] = useState(false)
 
   const {
-    isRecording,
     startRecording,
     stopRecording,
   } = useAudioRecorder({
@@ -47,14 +45,8 @@ export function TextWriterView() {
     },
     onError: (error) => {
       console.error('Recorder error:', error)
-      setStoreIsRecording(false)
     }
   })
-
-  // Sync state
-  if (isRecording !== storeIsRecording) {
-    setStoreIsRecording(isRecording)
-  }
 
   const handleToggleMic = () => {
     if (wsStatus !== 'connected') {

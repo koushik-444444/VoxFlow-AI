@@ -21,55 +21,66 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-slate-950 overflow-hidden">
-      <AnimatePresence mode="wait">
-        {activeService === 'writer' && <TextWriterView key="writer" />}
-      </AnimatePresence>
-      {/* Sidebar */}
+      {/* Sidebar - Always available but can be toggled */}
       <Sidebar />
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col relative">
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between px-8 py-6 z-10"
-        >
-          <div className="flex items-center gap-4">
-            {!sidebarOpen && (
-              <button 
-                onClick={toggleSidebar}
-                className="p-3 rounded-2xl bg-vox-light border border-vox-gray text-white shadow-lg"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" />
-                </svg>
-              </button>
-            )}
-            <div>
-              <h1 className="text-2xl font-black tracking-tighter text-white">VoxFlow</h1>
-              <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-vox-rose opacity-80">Intelligence v1.0</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
+        <AnimatePresence mode="wait">
+          {activeService === 'writer' ? (
+            <TextWriterView key="writer" />
+          ) : (
             <motion.div 
-              whileHover={{ scale: 1.05 }}
-              className="px-5 py-2 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest shadow-xl cursor-pointer"
+              key="chat"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex-1 flex flex-col relative"
             >
-              Try Premium
+              {/* Header */}
+              <motion.header
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between px-8 py-6 z-10"
+              >
+                <div className="flex items-center gap-4">
+                  {!sidebarOpen && (
+                    <button 
+                      onClick={toggleSidebar}
+                      className="p-3 rounded-2xl bg-vox-light border border-vox-gray text-white shadow-lg"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16m-7 6h7" />
+                      </svg>
+                    </button>
+                  )}
+                  <div>
+                    <h1 className="text-2xl font-black tracking-tighter text-white">VoxFlow</h1>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-vox-rose opacity-80">Intelligence v1.0</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <motion.div 
+                    whileHover={{ scale: 1.05 }}
+                    className="px-5 py-2 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest shadow-xl cursor-pointer"
+                  >
+                    Try Premium
+                  </motion.div>
+                </div>
+              </motion.header>
+
+              {/* Chat Area */}
+              <ChatArea />
+
+              {/* Waveform Visualizer */}
+              <WaveformVisualizer />
+
+              {/* Control Panel */}
+              <ControlPanel />
             </motion.div>
-          </div>
-        </motion.header>
-
-        {/* Chat Area */}
-        <ChatArea />
-
-        {/* Waveform Visualizer */}
-        <WaveformVisualizer />
-
-        {/* Control Panel */}
-        <ControlPanel />
+          )}
+        </AnimatePresence>
       </main>
 
       <Toaster />

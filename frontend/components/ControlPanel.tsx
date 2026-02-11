@@ -8,20 +8,18 @@ import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function ControlPanel() {
   const {
-    isRecording: storeIsRecording,
-    setIsRecording: setStoreIsRecording,
+    isRecording,
     sendAudioChunk,
     sendInterrupt,
     wsStatus,
     initializeSession,
-    isTranscribing,
-    setIsTranscribing
+    setIsTranscribing,
+    wsConnection
   } = useStore()
 
   const [showSettings, setShowSettings] = useState(false)
 
   const {
-    isRecording,
     startRecording,
     stopRecording,
   } = useAudioRecorder({
@@ -34,17 +32,10 @@ export function ControlPanel() {
     },
     onError: (error) => {
       console.error('Recorder error:', error)
-      setStoreIsRecording(false)
     }
   })
 
-  // Synchronize store with local recorder state
-  if (isRecording !== storeIsRecording) {
-    setStoreIsRecording(isRecording)
-  }
-
   const handleToggle = () => {
-    const { wsConnection, wsStatus } = useStore.getState()
     const isWsConnected = wsConnection && wsStatus === 'connected'
 
     if (isRecording) {
