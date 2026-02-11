@@ -154,27 +154,6 @@ export function ControlPanel() {
   )
 }
 
-      {/* Settings Panel */}
-      <AnimatePresence>
-        {showSettings && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="border-t border-slate-800/50 overflow-hidden"
-          >
-            <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
-              <VoiceSelector />
-              <SpeedControl />
-              <ModelInfo />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
 function VoiceSelector() {
   const { selectedVoice, setSelectedVoice } = useStore()
 

@@ -211,6 +211,3 @@ export function TextWriterView() {
     </motion.div>
   )
 }
-    </motion.div>
-  )
-}

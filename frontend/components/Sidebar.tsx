@@ -88,46 +88,11 @@ export function Sidebar() {
             ))}
           </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      exportConversation(conversation)
-                    }}
-                    className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-slate-200"
-                  >
-                    <Download className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      deleteConversation(conversation.id)
-                    }}
-                    className="p-1.5 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.div>
-            ))}
-
-            {conversations.length === 0 && (
-              <div className="text-center py-8 text-slate-500">
-                <MessageSquare className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No conversations yet</p>
-                <p className="text-xs mt-1">Start a new conversation to begin</p>
-              </div>
-            )}
-          </div>
-
           {/* Footer */}
-          <div className="p-6">
-            <button className="flex items-center gap-4 w-full p-4 rounded-2xl bg-vox-light/30 hover:bg-vox-light text-slate-400 hover:text-white transition-all border border-transparent hover:border-vox-gray">
-              <div className="w-10 h-10 rounded-xl bg-vox-gray flex items-center justify-center">
-                <Settings className="w-5 h-5 text-slate-300" />
-              </div>
-              <span className="text-sm font-bold">Settings</span>
+          <div className="p-4">
+            <button className="flex items-center gap-3 w-full p-3 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all">
+              <Settings className="w-5 h-5" />
+              <span className="text-sm font-medium">Settings</span>
             </button>
           </div>
         </motion.aside>
@@ -139,14 +104,28 @@ export function Sidebar() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           onClick={toggleSidebar}
-          className="absolute left-4 top-4 z-50 p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-400 hover:text-slate-200 transition-colors"
+          className="absolute left-4 top-4 z-50 p-3 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
         >
-          <ChevronRight className="w-5 h-5" />
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
         </motion.button>
       )}
     </AnimatePresence>
   )
 }
+
+function exportConversation(conversation: any) {
+  const dataStr = JSON.stringify(conversation, null, 2)
+  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(dataBlob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `conversation-${conversation.id}.json`
+  link.click()
+  URL.revokeObjectURL(url)
+}
+
 
 function exportConversation(conversation: any) {
   const dataStr = JSON.stringify(conversation, null, 2)
