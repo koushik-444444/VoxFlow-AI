@@ -31,33 +31,22 @@ export function ChatArea() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="py-20 flex flex-col items-center"
+              className="py-20 flex flex-col items-center justify-center min-h-[60vh]"
             >
-              <h2 className="text-4xl md:text-6xl font-medium tracking-tight mb-4 text-left w-full px-6">
-                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hello, User</span>
-                <br />
-                <span className="text-gemini-muted">How can I help you today?</span>
-              </h2>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 w-full px-6">
-                <div 
-                  onClick={() => setService('writer')}
-                  className="p-6 rounded-[24px] bg-gemini-sidebar border border-gemini-border hover:bg-gemini-hover transition-all cursor-pointer group flex flex-col justify-between h-48"
-                >
-                  <p className="text-lg text-gemini-text">Write a creative story or helpful content</p>
-                  <div className="flex justify-end">
-                    <div className="w-10 h-10 rounded-full bg-gemini-bg flex items-center justify-center group-hover:text-gemini-blue transition-all">
-                      <FileText className="w-5 h-5" />
-                    </div>
-                  </div>
-                </div>
-                <div className="p-6 rounded-[24px] bg-gemini-sidebar border border-gemini-border hover:bg-gemini-hover transition-all cursor-pointer group flex flex-col justify-between h-48 opacity-60">
-                  <p className="text-lg text-gemini-text">Explore more possibilities coming soon</p>
-                  <div className="flex justify-end">
-                    <div className="w-10 h-10 rounded-full bg-gemini-bg flex items-center justify-center">
-                      <Bot className="w-5 h-5" />
-                    </div>
-                  </div>
+              <div className="w-full max-w-2xl px-6">
+                <h2 className="text-5xl font-medium tracking-tight mb-8">
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hi Koushik</span>
+                  <br />
+                  <span className="text-[#c4c7c5]">Where should we start?</span>
+                </h2>
+                
+                <div className="flex flex-wrap gap-2 mt-12">
+                  <SuggestedPill icon="🎨" text="Create image" />
+                  <SuggestedPill icon="🏏" text="Explore cricket" />
+                  <SuggestedPill icon="✨" text="Boost my day" />
+                  <SuggestedPill icon="🎬" text="Create video" />
+                  <SuggestedPill icon="🎓" text="Help me learn" />
+                  <SuggestedPill icon="✍️" text="Write anything" />
                 </div>
               </div>
             </motion.div>
@@ -140,37 +129,37 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
-      className={`flex items-start gap-4 px-6 md:px-0 ${isUser ? 'flex-row' : 'flex-row'}`}
+      className={`flex items-start gap-4 px-6 md:px-0 group ${isUser ? 'flex-row' : 'flex-row'}`}
     >
       {/* Avatar */}
       <div
         className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
           isUser
-            ? 'bg-gemini-hover'
+            ? 'bg-gradient-to-br from-indigo-500 to-rose-500 text-white text-xs font-bold border border-white/10'
             : ''
         }`}
       >
         {isUser ? (
-          <User className="w-5 h-5 text-gemini-blue" />
+          'K'
         ) : (
-          <div className="w-6 h-6 bg-gemini-gradient rounded-full" />
+          <div className="w-6 h-6 bg-gemini-gradient rounded-full animate-pulse blur-[1px]" />
         )}
       </div>
 
       {/* Message Content */}
       <div className="flex-1 min-w-0 py-2">
-        <p className="text-[16px] leading-[1.6] text-gemini-text whitespace-pre-wrap">
+        <p className="text-[16px] leading-[1.6] text-[#e3e3e3] whitespace-pre-wrap font-medium">
           {message.content}
           {isStreaming && (
-            <span className="inline-block w-1.5 h-5 ml-1 bg-gemini-blue animate-pulse align-middle" />
+            <span className="inline-block w-1.5 h-5 ml-1 bg-blue-400 animate-pulse align-middle" />
           )}
         </p>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleCopy}
-            className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
+            className="p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] hover:text-white transition-all"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
           </button>
@@ -178,7 +167,7 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
           {!isUser && message.audioUrl && (
             <button
               onClick={handlePlay}
-              className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
+              className="p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] hover:text-white transition-all"
             >
               {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
@@ -186,5 +175,18 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
         </div>
       </div>
     </motion.div>
+  )
+}
+
+function SuggestedPill({ icon, text }: { icon: string, text: string }) {
+  const { setService } = useStore()
+  return (
+    <button 
+      onClick={() => text === 'Write anything' && setService('writer')}
+      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#1e1f20] border border-[#444746] hover:bg-[#333537] transition-all text-sm font-medium text-[#e3e3e3]"
+    >
+      <span>{icon}</span>
+      <span>{text}</span>
+    </button>
   )
 }

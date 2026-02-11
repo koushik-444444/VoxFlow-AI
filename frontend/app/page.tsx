@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User } from 'lucide-react'
+import { User, ChevronDown } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
 import { ChatArea } from '@/components/ChatArea'
 import { ControlPanel } from '@/components/ControlPanel'
@@ -55,12 +55,19 @@ export default function Home() {
                       </svg>
                     </button>
                   )}
-                  <h1 className="text-xl font-medium text-gemini-muted px-2">VoxFlow</h1>
+                  <h1 className="text-xl font-medium text-[#e3e3e3] px-2 flex items-center gap-2">
+                    VoxFlow
+                    <ChevronDown className="w-4 h-4 text-gemini-muted" />
+                  </h1>
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-gemini-gradient animate-pulse opacity-20 blur-sm absolute" />
-                  <User className="w-6 h-6 text-gemini-muted hover:text-white cursor-pointer transition-colors relative" />
+                  <div className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#444746] text-xs font-bold text-gemini-text cursor-pointer hover:bg-gemini-hover">
+                    <span className="bg-gemini-gradient bg-clip-text text-transparent">PRO</span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold border border-white/20">
+                    K
+                  </div>
                 </div>
               </motion.header>
 
