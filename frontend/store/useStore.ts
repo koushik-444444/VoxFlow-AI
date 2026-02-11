@@ -358,14 +358,16 @@ function handleWebSocketMessage(
 ) {
   switch (data.type) {
     case 'transcription':
-      // Final transcription - add to messages
+      // Final or partial transcription
+      if (state.activeService === 'writer') {
+        state.setWriterContent(data.text)
+      }
+
       if (!data.is_partial) {
         state.setIsTranscribing(false)
         state.setAssistantIsThinking(true)
         
-        if (state.activeService === 'writer') {
-          state.setWriterContent(data.text)
-        } else {
+        if (state.activeService !== 'writer') {
           state.addMessage({
             role: 'user',
             content: data.text,

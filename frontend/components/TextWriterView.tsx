@@ -25,7 +25,9 @@ export function TextWriterView() {
     setWriterContent,
     isRecording: storeIsRecording,
     setIsRecording: setStoreIsRecording,
+    isTranscribing,
     setIsTranscribing,
+    assistantIsThinking,
     sendAudioChunk,
     wsStatus,
     wsConnection,
@@ -55,6 +57,11 @@ export function TextWriterView() {
   }
 
   const handleToggleMic = () => {
+    if (wsStatus !== 'connected') {
+      alert('Connection lost. Please wait a moment or refresh.')
+      return
+    }
+
     const isWsConnected = wsConnection && wsStatus === 'connected'
 
     if (isRecording) {
@@ -131,46 +138,75 @@ export function TextWriterView() {
       {/* Main Content (Orb area) */}
       <div className="flex-1 relative flex flex-col items-center justify-center px-10">
         {/* Background Visualizer (Reusable) */}
-        <WaveformVisualizer />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+          <WaveformVisualizer />
+        </div>
 
         {/* Text Area */}
-        <div className="mt-20 max-w-lg w-full text-center">
+        <div className="z-10 w-full max-w-2xl text-center">
           <AnimatePresence mode="wait">
             {writerContent ? (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="space-y-8"
               >
-                <p className="text-2xl font-bold text-white leading-snug">
+                <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight px-4">
                   {writerContent}
-                </p>
+                  {assistantIsThinking && (
+                    <motion.span 
+                      animate={{ opacity: [0, 1, 0] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                      className="inline-block w-1.5 h-10 bg-vox-purple ml-2 translate-y-1"
+                    />
+                  )}
+                </h2>
                 
-                <div className="flex items-center justify-center gap-3 pt-4">
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="flex items-center justify-center gap-3 pt-6"
+                >
                   <button
                     onClick={handleCopy}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white transition-all shadow-lg"
+                    className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white hover:border-vox-gray transition-all shadow-xl active:scale-95"
                   >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    <span className="text-xs font-bold uppercase tracking-widest">Copy</span>
+                    {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
+                    <span className="text-sm font-black uppercase tracking-widest">Copy</span>
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white transition-all shadow-lg"
+                    className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white hover:border-vox-gray transition-all shadow-xl active:scale-95"
                   >
-                    <Download className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-widest">Download</span>
+                    <Download className="w-5 h-5" />
+                    <span className="text-sm font-black uppercase tracking-widest">Download</span>
                   </button>
-                </div>
+                </motion.div>
               </motion.div>
             ) : (
-              <motion.p 
+              <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-2xl font-bold text-slate-600 leading-snug"
+                className="space-y-4"
               >
-                {isRecording ? 'Listening to your ideas...' : 'Speak to start writing...'}
-              </motion.p>
+                <p className="text-3xl md:text-4xl font-black text-slate-700 leading-tight">
+                  {isRecording ? (
+                    <span className="text-white">Listening to your voice...</span>
+                  ) : isTranscribing ? (
+                    <span className="text-vox-purple">Converting speech to text...</span>
+                  ) : (
+                    <>
+                      Tell me about this year's <span className="text-slate-800">top 5 trends | for Instagram marketers</span>
+                    </>
+                  )}
+                </p>
+                {!isRecording && !isTranscribing && (
+                  <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs pt-4">
+                    Tap the microphone to start writing
+                  </p>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
