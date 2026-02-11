@@ -125,15 +125,3 @@ function exportConversation(conversation: any) {
   link.click()
   URL.revokeObjectURL(url)
 }
-
-
-function exportConversation(conversation: any) {
-  const dataStr = JSON.stringify(conversation, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(dataBlob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `conversation-${conversation.id}.json`
-  link.click()
-  URL.revokeObjectURL(url)
-}
