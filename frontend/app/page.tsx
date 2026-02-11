@@ -1,16 +1,17 @@
 'use client'
 
 import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Sidebar } from '@/components/Sidebar'
 import { ChatArea } from '@/components/ChatArea'
 import { ControlPanel } from '@/components/ControlPanel'
 import { WaveformVisualizer } from '@/components/WaveformVisualizer'
+import { TextWriterView } from '@/components/TextWriterView'
 import { useStore } from '@/store/useStore'
 import { Toaster } from '@/components/ui/Toaster'
 
 export default function Home() {
-  const { initializeSession, isInitialized, sidebarOpen, toggleSidebar } = useStore()
+  const { initializeSession, isInitialized, sidebarOpen, toggleSidebar, activeService } = useStore()
 
   useEffect(() => {
     if (!isInitialized) {
@@ -20,6 +21,9 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-slate-950 overflow-hidden">
+      <AnimatePresence mode="wait">
+        {activeService === 'writer' && <TextWriterView key="writer" />}
+      </AnimatePresence>
       {/* Sidebar */}
       <Sidebar />
 

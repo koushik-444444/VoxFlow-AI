@@ -7,7 +7,7 @@ import { useStore } from '@/store/useStore'
 import { useState } from 'react'
 
 export function ChatArea() {
-  const { conversations, currentConversationId, isRecording, isTranscribing, assistantIsThinking } = useStore()
+  const { conversations, currentConversationId, isRecording, isTranscribing, assistantIsThinking, setService } = useStore()
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const currentConversation = conversations.find(
@@ -52,7 +52,10 @@ export function ChatArea() {
 
             {/* Quick Actions from Image 1 */}
             <div className="grid grid-cols-2 gap-4 mt-8">
-              <div className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl">
+              <div 
+                onClick={() => setService('writer')}
+                className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl active:scale-95"
+              >
                 <p className="font-black text-xl text-white mb-10 leading-tight">AI text<br />writer</p>
                 <div className="flex justify-end">
                   <div className="w-10 h-10 rounded-full bg-vox-light flex items-center justify-center group-hover:bg-vox-purple transition-all">

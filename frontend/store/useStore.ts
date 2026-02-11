@@ -62,9 +62,13 @@ interface AppState {
   setLatency: (value: number) => void
 
   // UI
+  activeService: 'chat' | 'writer'
   sidebarOpen: boolean
   isTranscribing: boolean
   assistantIsThinking: boolean
+  writerContent: string
+  setService: (service: 'chat' | 'writer') => void
+  setWriterContent: (content: string) => void
   toggleSidebar: () => void
   setIsTranscribing: (value: boolean) => void
   setAssistantIsThinking: (value: boolean) => void
@@ -324,10 +328,14 @@ export const useStore = create<AppState>()(
       setLatency: (value) => set({ latency: value }),
 
       // UI
+      activeService: 'chat',
       sidebarOpen: true,
       isTranscribing: false,
       assistantIsThinking: false,
+      writerContent: '',
 
+      setService: (service) => set({ activeService: service }),
+      setWriterContent: (content) => set({ writerContent: content }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
       setIsTranscribing: (value) => set({ isTranscribing: value }),
       setAssistantIsThinking: (value) => set({ assistantIsThinking: value }),
@@ -354,10 +362,15 @@ function handleWebSocketMessage(
       if (!data.is_partial) {
         state.setIsTranscribing(false)
         state.setAssistantIsThinking(true)
-        state.addMessage({
-          role: 'user',
-          content: data.text,
-        })
+        
+        if (state.activeService === 'writer') {
+          state.setWriterContent(data.text)
+        } else {
+          state.addMessage({
+            role: 'user',
+            content: data.text,
+          })
+        }
       }
       break
 
@@ -365,10 +378,14 @@ function handleWebSocketMessage(
       // Handle streaming LLM response
       if (data.is_final) {
         state.setAssistantIsThinking(false)
-        state.addMessage({
-          role: 'assistant',
-          content: data.full_response,
-        })
+        if (state.activeService === 'writer') {
+          state.setWriterContent(data.full_response)
+        } else {
+          state.addMessage({
+            role: 'assistant',
+            content: data.full_response,
+          })
+        }
       }
       break
 
