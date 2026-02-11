@@ -5,14 +5,9 @@ import {
   MessageSquare,
   Plus,
   Trash2,
-  Download,
   Settings,
-  X,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react'
 import { useStore } from '@/store/useStore'
-import { format } from 'date-fns'
 
 export function Sidebar() {
   const {
@@ -113,15 +108,4 @@ export function Sidebar() {
       )}
     </AnimatePresence>
   )
-}
-
-function exportConversation(conversation: any) {
-  const dataStr = JSON.stringify(conversation, null, 2)
-  const dataBlob = new Blob([dataStr], { type: 'application/json' })
-  const url = URL.createObjectURL(dataBlob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `conversation-${conversation.id}.json`
-  link.click()
-  URL.revokeObjectURL(url)
 }

@@ -3,7 +3,6 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ChevronLeft, 
-  MoreVertical, 
   Mic, 
   RefreshCw, 
   X, 
@@ -14,7 +13,7 @@ import {
   Square
 } from 'lucide-react'
 import { useStore } from '@/store/useStore'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { WaveformVisualizer } from './WaveformVisualizer'
 import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
@@ -123,7 +122,9 @@ export function TextWriterView() {
 
       {/* Main Content (Focused) */}
       <div className="flex-1 relative flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-10">
-        <WaveformVisualizer />
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+          <WaveformVisualizer />
+        </div>
 
         <div className="z-10 w-full text-center">
           <AnimatePresence mode="wait">
@@ -168,6 +169,8 @@ export function TextWriterView() {
                 <p className="text-4xl md:text-6xl font-medium text-gemini-muted leading-tight">
                   {isRecording ? (
                     <span className="text-gemini-text">Listening...</span>
+                  ) : isTranscribing ? (
+                    <span className="text-gemini-blue animate-pulse">Processing...</span>
                   ) : (
                     <>What's on your mind?</>
                   )}

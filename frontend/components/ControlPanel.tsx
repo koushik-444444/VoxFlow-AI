@@ -14,7 +14,9 @@ export function ControlPanel() {
     wsStatus,
     initializeSession,
     setIsTranscribing,
-    wsConnection
+    wsConnection,
+    assistantIsThinking,
+    isTranscribing
   } = useStore()
 
   const [showSettings, setShowSettings] = useState(false)
@@ -24,9 +26,7 @@ export function ControlPanel() {
     stopRecording,
   } = useAudioRecorder({
     onDataAvailable: (data) => {
-      // Send data regardless of state during the short window of stopping
       if (data.size > 0) {
-        // console.log('Audio data available:', data.size)
         sendAudioChunk(data)
       }
     },
@@ -42,14 +42,12 @@ export function ControlPanel() {
       stopRecording()
       setIsTranscribing(true)
       
-      // Wait a tiny bit for the last data chunk to be emitted and sent
       setTimeout(() => {
         if (isWsConnected) {
           wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
         }
       }, 200)
     } else {
-      // Signal start of a new recording to clear backend buffer
       if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
@@ -89,9 +87,9 @@ export function ControlPanel() {
             {isRecording ? (
               <span className="text-gemini-text font-medium animate-pulse">Listening...</span>
             ) : isTranscribing ? (
-              <span className="text-gemini-blue">Processing voice...</span>
+              <span className="text-gemini-blue font-medium">Processing voice...</span>
             ) : assistantIsThinking ? (
-              <span className="text-gemini-purple">Thinking...</span>
+              <span className="text-gemini-purple font-medium">Thinking...</span>
             ) : (
               'Enter a prompt here or tap the mic'
             )}
@@ -133,7 +131,7 @@ export function ControlPanel() {
         </div>
       </div>
 
-      {/* Settings Panel Popover (Simplified Gemini Style) */}
+      {/* Settings Panel Popover */}
       <AnimatePresence>
         {showSettings && (
           <motion.div
@@ -156,26 +154,22 @@ export function ControlPanel() {
 
 function VoiceSelector() {
   const { selectedVoice, setSelectedVoice } = useStore()
-
   const voices = [
     { id: 'default', name: 'Default', description: 'Natural voice' },
     { id: 'female-1', name: 'Sarah', description: 'Female voice' },
     { id: 'male-1', name: 'Michael', description: 'Male voice' },
     { id: 'neutral-1', name: 'Alex', description: 'Gender neutral' },
   ]
-
   return (
     <div>
       <label className="text-sm font-medium text-slate-300 mb-2 block">Voice</label>
       <select
         value={selectedVoice}
         onChange={(e) => setSelectedVoice(e.target.value)}
-        className="w-full px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg text-sm text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+        className="w-full px-3 py-2 bg-gemini-bg border border-gemini-border rounded-lg text-sm text-slate-300 focus:outline-none"
       >
         {voices.map((voice) => (
-          <option key={voice.id} value={voice.id}>
-            {voice.name} - {voice.description}
-          </option>
+          <option key={voice.id} value={voice.id}>{voice.name}</option>
         ))}
       </select>
     </div>
@@ -184,47 +178,26 @@ function VoiceSelector() {
 
 function SpeedControl() {
   const [speed, setSpeed] = useState(1.0)
-
   return (
     <div>
-      <label className="text-sm font-medium text-slate-300 mb-2 block">
-        Speech Speed: {speed.toFixed(1)}x
-      </label>
+      <label className="text-sm font-medium text-slate-300 mb-2 block">Speed: {speed}x</label>
       <input
-        type="range"
-        min="0.5"
-        max="2.0"
-        step="0.1"
-        value={speed}
+        type="range" min="0.5" max="2.0" step="0.1" value={speed}
         onChange={(e) => setSpeed(parseFloat(e.target.value))}
-        className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+        className="w-full h-1.5 bg-gemini-border rounded-lg appearance-none cursor-pointer accent-gemini-blue"
       />
-      <div className="flex justify-between text-xs text-slate-500 mt-1">
-        <span>0.5x</span>
-        <span>1.0x</span>
-        <span>2.0x</span>
-      </div>
     </div>
   )
 }
 
 function ModelInfo() {
   const { selectedModel } = useStore()
-
-  const models: Record<string, { name: string; description: string }> = {
-    'gpt-3.5-turbo': { name: 'GPT-3.5 Turbo', description: 'Fast & efficient' },
-    'gpt-4': { name: 'GPT-4', description: 'Most capable' },
-    'claude-instant': { name: 'Claude Instant', description: 'Quick responses' },
-  }
-
-  const model = models[selectedModel] || models['gpt-3.5-turbo']
-
   return (
     <div>
-      <label className="text-sm font-medium text-slate-300 mb-2 block">Model</label>
-      <div className="px-3 py-2 bg-slate-800/50 border border-slate-700/50 rounded-lg">
-        <p className="text-sm text-slate-200">{model.name}</p>
-        <p className="text-xs text-slate-500">{model.description}</p>
+      <label className="text-sm font-medium text-slate-300 mb-2 block">Active Engine</label>
+      <div className="px-3 py-2 bg-gemini-bg border border-gemini-border rounded-lg">
+        <p className="text-sm text-gemini-blue font-bold">Groq LPU™</p>
+        <p className="text-[10px] text-gemini-muted uppercase tracking-tighter">Inference Powered</p>
       </div>
     </div>
   )

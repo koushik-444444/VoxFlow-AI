@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Bot, Volume2, VolumeX, Copy, Check } from 'lucide-react'
+import { User, Bot, Volume2, VolumeX, Copy, Check, FileText } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useState } from 'react'
 
@@ -70,12 +70,6 @@ export function ChatArea() {
               index={index}
             />
           ))}
-          <MessageBubble
-            key={message.id}
-            message={message}
-            index={index}
-          />
-        ))}
 
         {(isRecording || isTranscribing) && (
           <motion.div
