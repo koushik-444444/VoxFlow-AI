@@ -70,119 +70,89 @@ export function ControlPanel() {
   const hasError = wsStatus === 'error'
 
   return (
-    <div className="border-t border-vox-gray bg-vox-black/90 backdrop-blur-2xl px-6 py-8">
-      {/* Main Controls */}
-      <div className="max-w-md mx-auto flex items-center justify-between gap-4">
-        {/* Reset/Interrupt Button */}
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: -15 }}
-          whileTap={{ scale: 0.9 }}
+    <div className="px-6 py-10 w-full max-w-4xl mx-auto">
+      {/* Main Input Pill */}
+      <div className="relative flex items-center gap-4 bg-gemini-sidebar border border-gemini-border rounded-[32px] px-6 py-4 shadow-xl focus-within:ring-1 focus-within:ring-gemini-border transition-all">
+        {/* Reset/Interrupt */}
+        <button
           onClick={handleInterrupt}
           disabled={!isConnected}
-          className="w-12 h-12 flex items-center justify-center rounded-2xl bg-vox-light border border-vox-gray text-slate-400 hover:text-white transition-all disabled:opacity-20 shadow-lg shadow-black/20"
-          title="Interrupt"
+          className="p-2 text-gemini-muted hover:text-white transition-all disabled:opacity-20"
+          title="Reset"
         >
-          <RefreshCw className="w-5 h-5" />
-        </motion.button>
+          <RefreshCw className={`w-5 h-5 ${isConnecting ? 'animate-spin' : ''}`} />
+        </button>
 
-        {/* Record Button */}
-        {hasError ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleRetry}
-            className="w-20 h-20 flex items-center justify-center rounded-[32px] bg-orange-500 shadow-2xl shadow-orange-500/30 text-white"
+        {/* Dynamic Status Text */}
+        <div className="flex-1 min-w-0">
+          <p className="text-gemini-muted truncate text-sm">
+            {isRecording ? (
+              <span className="text-gemini-text font-medium animate-pulse">Listening...</span>
+            ) : isTranscribing ? (
+              <span className="text-gemini-blue">Processing voice...</span>
+            ) : assistantIsThinking ? (
+              <span className="text-gemini-purple">Thinking...</span>
+            ) : (
+              'Enter a prompt here or tap the mic'
+            )}
+          </p>
+        </div>
+
+        {/* Controls Group */}
+        <div className="flex items-center gap-2">
+          {/* Settings */}
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-2 rounded-full transition-all ${showSettings ? 'text-gemini-blue bg-gemini-hover' : 'text-gemini-muted hover:text-white'}`}
           >
-            <RefreshCw className="w-8 h-8 animate-spin-slow" />
-          </motion.button>
-        ) : (
+            <Settings2 className="w-5 h-5" />
+          </button>
+
+          {/* Voice Record Button */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={handleToggle}
             disabled={!isConnected}
-            className={`relative w-24 h-24 flex items-center justify-center rounded-[36px] transition-all shadow-2xl ${
+            className={`relative w-12 h-12 flex items-center justify-center rounded-full transition-all ${
               isRecording
-                ? 'bg-vox-rose shadow-vox-rose/40'
-                : 'bg-vox-gradient shadow-vox-purple/40'
-            } disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed`}
+                ? 'bg-gemini-gradient shadow-lg shadow-gemini-blue/20'
+                : 'hover:bg-gemini-hover text-gemini-blue'
+            } disabled:opacity-50 disabled:grayscale`}
           >
-            <AnimatePresence mode="wait">
-              {isRecording ? (
-                <motion.div
-                  key="recording"
-                  initial={{ scale: 0, rotate: 90 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: -90 }}
-                >
-                  <Square className="w-10 h-10 text-white fill-white" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="idle"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <Mic className="w-10 h-10 text-white" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Recording Pulse */}
+            {isRecording ? (
+              <Square className="w-5 h-5 text-white fill-white" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
+            
             {isRecording && (
-              <>
-                <span className="absolute inset-0 rounded-[36px] bg-vox-rose animate-ping opacity-25" />
-                <span className="absolute -inset-4 rounded-[40px] border-2 border-vox-rose/20 animate-pulse" />
-              </>
+              <span className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping" />
             )}
           </motion.button>
+        </div>
+      </div>
+
+      {/* Settings Panel Popover (Simplified Gemini Style) */}
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="mt-4 p-6 bg-gemini-sidebar border border-gemini-border rounded-[24px] shadow-2xl"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <VoiceSelector />
+              <SpeedControl />
+              <ModelInfo />
+            </div>
+          </motion.div>
         )}
-
-        {/* Settings Button */}
-        <motion.button
-          whileHover={{ scale: 1.1, rotate: 15 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowSettings(!showSettings)}
-          className={`w-12 h-12 flex items-center justify-center rounded-2xl border transition-all shadow-lg ${
-            showSettings
-              ? 'bg-vox-purple/20 border-vox-purple text-vox-purple'
-              : 'bg-vox-light border-vox-gray text-slate-400 hover:text-white'
-          }`}
-        >
-          <Settings2 className="w-5 h-5" />
-        </motion.button>
-      </div>
-
-      {/* Status Bar */}
-      <div className="mt-8 flex flex-col items-center gap-3">
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-vox-light border border-vox-gray shadow-inner">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-emerald-400 animate-pulse' : 
-              isConnecting ? 'bg-amber-400 animate-bounce' : 'bg-rose-500'
-            }`}
-          />
-          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-            {hasError ? 'Connection Error' : isConnecting ? 'Syncing...' : isConnected ? 'Live' : 'Offline'}
-          </span>
-        </div>
-        
-        <div className="h-6 flex items-center justify-center">
-          <AnimatePresence>
-            {isRecording && (
-              <motion.span
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="text-sm font-bold text-vox-rose animate-pulse"
-              >
-                VoxFlow is listening...
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+      </AnimatePresence>
+    </div>
+  )
+}
 
       {/* Settings Panel */}
       <AnimatePresence>

@@ -101,167 +101,116 @@ export function TextWriterView() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-vox-black z-50 flex flex-col"
+      className="fixed inset-0 bg-gemini-bg z-50 flex flex-col"
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-6">
+      <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
           <button 
             onClick={handleClose}
-            className="p-2 text-slate-400 hover:text-white transition-colors"
+            className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
           >
             <ChevronLeft className="w-6 h-6" />
           </button>
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-vox-gradient flex items-center justify-center shadow-lg">
-              <FileText className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gemini-sidebar border border-gemini-border flex items-center justify-center">
+              <FileText className="w-4 h-4 text-gemini-blue" />
             </div>
-            <div>
-              <h2 className="text-lg font-black tracking-tight text-white leading-tight">Text writer</h2>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Marketing in 2025</p>
-            </div>
+            <h2 className="text-sm font-medium text-gemini-text">Text writer</h2>
           </div>
         </div>
-        <button className="p-2 text-slate-400 hover:text-white">
-          <MoreVertical className="w-6 h-6" />
-        </button>
       </header>
 
-      {/* Main Content (Orb area) */}
-      <div className="flex-1 relative flex flex-col items-center justify-center px-10">
-        {/* Background Visualizer (Reusable) */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-          <WaveformVisualizer />
-        </div>
+      {/* Main Content (Focused) */}
+      <div className="flex-1 relative flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-10">
+        <WaveformVisualizer />
 
-        {/* Text Area */}
-        <div className="z-10 w-full max-w-2xl text-center">
+        <div className="z-10 w-full text-center">
           <AnimatePresence mode="wait">
             {writerContent ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="space-y-8"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-12"
               >
-                <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight px-4">
-                  {writerContent}
-                  {assistantIsThinking && (
-                    <motion.span 
-                      animate={{ opacity: [0, 1, 0] }}
-                      transition={{ duration: 1, repeat: Infinity }}
-                      className="inline-block w-1.5 h-10 bg-vox-purple ml-2 translate-y-1"
-                    />
-                  )}
-                </h2>
+                <div className="relative group">
+                  <h2 className="text-3xl md:text-5xl font-medium text-gemini-text leading-tight px-4">
+                    {writerContent}
+                    {assistantIsThinking && (
+                      <span className="inline-block w-1 h-8 bg-gemini-blue ml-2 animate-pulse align-middle" />
+                    )}
+                  </h2>
+                </div>
                 
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="flex items-center justify-center gap-3 pt-6"
-                >
+                <div className="flex items-center justify-center gap-3">
                   <button
                     onClick={handleCopy}
-                    className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white hover:border-vox-gray transition-all shadow-xl active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all shadow-md active:scale-95"
                   >
-                    {copied ? <Check className="w-5 h-5 text-emerald-400" /> : <Copy className="w-5 h-5" />}
-                    <span className="text-sm font-black uppercase tracking-widest">Copy</span>
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                    <span className="text-sm font-medium uppercase tracking-wider">Copy</span>
                   </button>
                   <button
                     onClick={handleDownload}
-                    className="flex items-center gap-3 px-6 py-3 rounded-2xl bg-vox-gray border border-vox-light text-slate-300 hover:text-white hover:border-vox-gray transition-all shadow-xl active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all shadow-md active:scale-95"
                   >
-                    <Download className="w-5 h-5" />
-                    <span className="text-sm font-black uppercase tracking-widest">Download</span>
+                    <Download className="w-4 h-4" />
+                    <span className="text-sm font-medium uppercase tracking-wider">Download</span>
                   </button>
-                </motion.div>
+                </div>
               </motion.div>
             ) : (
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="space-y-4"
+                className="space-y-6"
               >
-                <p className="text-3xl md:text-4xl font-black text-slate-700 leading-tight">
+                <p className="text-4xl md:text-6xl font-medium text-gemini-muted leading-tight">
                   {isRecording ? (
-                    <span className="text-white">Listening to your voice...</span>
-                  ) : isTranscribing ? (
-                    <span className="text-vox-purple">Converting speech to text...</span>
+                    <span className="text-gemini-text">Listening...</span>
                   ) : (
-                    <>
-                      Tell me about this year's <span className="text-slate-800">top 5 trends | for Instagram marketers</span>
-                    </>
+                    <>What's on your mind?</>
                   )}
                 </p>
-                {!isRecording && !isTranscribing && (
-                  <p className="text-slate-500 font-bold uppercase tracking-[0.2em] text-xs pt-4">
-                    Tap the microphone to start writing
-                  </p>
-                )}
+                <p className="text-gemini-muted text-lg">
+                  Tap the mic to start your creative flow
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
       </div>
 
-      {/* Bottom Controls (Mimicking Image 1) */}
-      <div className="pb-12 pt-6 px-10">
-        <div className="max-w-md mx-auto flex items-center justify-between gap-4">
+      {/* Simplified Controls */}
+      <div className="pb-16 pt-6 flex justify-center gap-6">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleToggleMic}
+          className={`relative w-20 h-20 flex items-center justify-center rounded-full transition-all shadow-2xl ${
+            isRecording
+              ? 'bg-gemini-gradient shadow-gemini-blue/40'
+              : 'bg-gemini-sidebar border border-gemini-border text-gemini-blue hover:bg-gemini-hover'
+          }`}
+        >
+          {isRecording ? <Square className="w-8 h-8 text-white fill-white" /> : <Mic className="w-8 h-8" />}
+          {isRecording && (
+            <span className="absolute inset-0 rounded-full border-4 border-white/20 animate-ping" />
+          )}
+        </motion.button>
+        
+        {writerContent && (
           <button 
             onClick={handleReset}
-            className="w-14 h-14 flex items-center justify-center rounded-2xl bg-vox-light border border-vox-gray text-slate-400 hover:text-white transition-all shadow-lg"
+            className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
           >
             <RefreshCw className="w-6 h-6" />
           </button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleToggleMic}
-            className={`relative w-24 h-24 flex items-center justify-center rounded-[36px] transition-all shadow-2xl ${
-              isRecording
-                ? 'bg-vox-rose shadow-vox-rose/40'
-                : 'bg-vox-gradient shadow-vox-purple/40'
-            }`}
-          >
-            <AnimatePresence mode="wait">
-              {isRecording ? (
-                <motion.div
-                  key="recording"
-                  initial={{ scale: 0, rotate: 90 }}
-                  animate={{ scale: 1, rotate: 0 }}
-                  exit={{ scale: 0, rotate: -90 }}
-                >
-                  <Square className="w-10 h-10 text-white fill-white" />
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="idle"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                >
-                  <Mic className="w-10 h-10 text-white" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            
-            {isRecording && (
-              <>
-                <span className="absolute inset-0 rounded-[36px] bg-vox-rose animate-ping opacity-25" />
-                <span className="absolute -inset-4 rounded-[40px] border-2 border-vox-rose/20 animate-pulse" />
-              </>
-            )}
-          </motion.button>
-
-          <button 
-            onClick={handleClose}
-            className="w-14 h-14 flex items-center justify-center rounded-2xl bg-vox-light border border-vox-gray text-slate-400 hover:text-white transition-all shadow-lg"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+        )}
       </div>
+    </motion.div>
+  )
+}
     </motion.div>
   )
 }

@@ -30,67 +30,63 @@ export function Sidebar() {
       {sidebarOpen && (
         <motion.aside
           initial={{ width: 0, opacity: 0 }}
-          animate={{ width: 320, opacity: 1 }}
+          animate={{ width: 280, opacity: 1 }}
           exit={{ width: 0, opacity: 0 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="border-r border-slate-800/50 bg-slate-900/50 backdrop-blur-xl flex flex-col"
+          className="border-r border-gemini-border bg-gemini-sidebar flex flex-col z-20"
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-vox-gradient flex items-center justify-center shadow-lg shadow-vox-purple/20">
-                <MessageSquare className="w-5 h-5 text-white" />
-              </div>
-              <span className="font-black text-xl tracking-tight text-white">VoxFlow</span>
-            </div>
+          <div className="flex items-center justify-between p-4">
             <button
               onClick={toggleSidebar}
-              className="p-2 rounded-xl bg-vox-light border border-vox-gray text-slate-400 hover:text-white transition-all shadow-md"
+              className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
             >
-              <ChevronLeft className="w-5 h-5" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
           </div>
 
-          {/* New Conversation Button */}
-          <div className="px-6 pb-4">
+          {/* New Chat Button */}
+          <div className="px-4 pb-6 mt-4">
             <button
               onClick={createConversation}
-              className="w-full flex items-center justify-center gap-2 px-4 py-4 rounded-2xl bg-vox-gradient hover:opacity-90 text-white font-bold transition-all shadow-xl shadow-vox-purple/20"
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-gemini-hover hover:bg-[#37393b] text-gemini-text font-medium transition-all group"
             >
-              <Plus className="w-6 h-6" />
-              New Session
+              <Plus className="w-5 h-5 text-gemini-blue group-hover:scale-110 transition-transform" />
+              <span className="text-sm">New chat</span>
             </button>
           </div>
 
           {/* Conversation List */}
-          <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3">
+          <div className="flex-1 overflow-y-auto px-2 space-y-1 custom-scrollbar">
+            <p className="px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-gemini-muted">Recent</p>
             {conversations.map((conversation) => (
               <motion.div
                 key={conversation.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className={`group relative flex items-center gap-4 p-4 rounded-2xl cursor-pointer transition-all border ${
+                className={`group relative flex items-center gap-3 px-4 py-2.5 rounded-full cursor-pointer transition-all ${
                   currentConversationId === conversation.id
-                    ? 'bg-vox-gray border-vox-purple/50 shadow-lg'
-                    : 'bg-vox-light/40 border-transparent hover:bg-vox-light/80 hover:border-vox-gray'
+                    ? 'bg-[#d3e3fd] text-[#041e49]'
+                    : 'hover:bg-gemini-hover text-gemini-text'
                 }`}
                 onClick={() => setCurrentConversation(conversation.id)}
               >
-                <div
-                  className={`w-1.5 h-8 rounded-full ${
-                    currentConversationId === conversation.id
-                      ? 'bg-vox-purple shadow-[0_0_10px_#ac1ed6]'
-                      : 'bg-vox-gray'
-                  }`}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[15px] font-bold text-slate-100 truncate">
-                    {conversation.title}
-                  </p>
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500 mt-0.5">
-                    {format(new Date(conversation.updatedAt), 'MMM d • HH:mm')}
-                  </p>
-                </div>
+                <MessageSquare className={`w-4 h-4 flex-shrink-0 ${currentConversationId === conversation.id ? 'text-[#041e49]' : 'text-gemini-muted'}`} />
+                <p className="text-sm font-medium truncate flex-1">
+                  {conversation.title}
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    deleteConversation(conversation.id)
+                  }}
+                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-black/10 transition-opacity`}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </motion.div>
+            ))}
+          </div>
 
                 {/* Actions */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

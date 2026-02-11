@@ -27,40 +27,40 @@
   }
 
   .dark {
-    --background: 280 10% 4%;
+    --background: 240 5% 5%;
     --foreground: 0 0% 98%;
-    --card: 280 10% 7%;
+    --card: 240 5% 7%;
     --card-foreground: 0 0% 98%;
-    --popover: 280 10% 4%;
+    --popover: 240 5% 5%;
     --popover-foreground: 0 0% 98%;
-    --primary: 286 75% 48%;
+    --primary: 217 100% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 356 41% 60%;
-    --secondary-foreground: 0 0% 100%;
-    --muted: 280 10% 15%;
+    --secondary: 260 100% 87%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 240 5% 15%;
     --muted-foreground: 0 0% 63.9%;
-    --accent: 280 10% 15%;
+    --accent: 240 5% 15%;
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 280 10% 15%;
-    --input: 280 10% 15%;
-    --ring: 286 75% 48%;
+    --border: 240 5% 20%;
+    --input: 240 5% 20%;
+    --ring: 217 100% 65%;
   }
 }
 
 @layer utilities {
-  .bg-vox-gradient {
-    background: linear-gradient(135deg, #ac1ed6 0%, #c26e73 100%);
+  .bg-gemini-gradient {
+    background: linear-gradient(135deg, #4b90ff 0%, #d0bcff 50%, #ff8fab 100%);
   }
-  .bg-vox-dark {
-    background-color: #090607;
+  .bg-gemini-dark {
+    background-color: #131314;
   }
-  .border-vox-gray {
-    border-color: #221f20;
+  .text-gemini-blue {
+    color: #4b90ff;
   }
-  .text-vox-purple {
-    color: #ac1ed6;
+  .gemini-pill {
+    @apply bg-gemini-sidebar hover:bg-gemini-hover border border-gemini-border rounded-full transition-all;
   }
 }
 
@@ -69,7 +69,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-vox-black text-foreground antialiased;
+    @apply bg-gemini-bg text-gemini-text antialiased;
     font-family: 'Epilogue', sans-serif;
   }
 }
@@ -81,25 +81,25 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-vox-black;
+  @apply bg-gemini-bg;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-vox-gray rounded-full;
+  @apply bg-gemini-border rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-vox-light;
+  @apply bg-gemini-muted;
 }
 
-/* AI Voice Blob Animation */
+/* AI Voice Blob Animation (Gemini Style) */
 .voice-blob {
   width: 280px;
   height: 280px;
-  background: linear-gradient(135deg, #ac1ed6 0%, #c26e73 100%);
+  background: linear-gradient(135deg, #4b90ff 0%, #d0bcff 100%);
   border-radius: 50%;
-  filter: blur(40px);
-  opacity: 0.8;
+  filter: blur(60px);
+  opacity: 0.4;
   animation: blob-bounce 8s infinite alternate;
 }
 
@@ -117,10 +117,10 @@
   transform: translate(-50%, -50%);
   width: 180px;
   height: 180px;
-  background: url('https://www.transparenttextures.com/patterns/stardust.png'), linear-gradient(135deg, #ac1ed6 0%, #c26e73 100%);
+  background: linear-gradient(135deg, #4b90ff 0%, #d0bcff 100%);
   border-radius: 50%;
   z-index: 10;
-  box-shadow: 0 0 50px rgba(172, 30, 214, 0.4);
+  box-shadow: 0 0 50px rgba(75, 144, 255, 0.2);
   animation: blob-rotate 20s linear infinite;
 }
 
@@ -131,7 +131,7 @@
 
 /* Audio wave animation */
 .wave-bar {
-  @apply w-1 bg-gradient-to-t from-indigo-500 to-purple-500 rounded-full;
+  @apply w-1 bg-gemini-blue rounded-full;
   animation: wave 1s ease-in-out infinite;
 }
 
@@ -141,24 +141,17 @@
 .wave-bar:nth-child(5) { animation-delay: 0.4s; }
 
 /* Glow effect */
-.glow-indigo {
-  box-shadow: 0 0 20px rgba(99, 102, 241, 0.5),
-              0 0 40px rgba(99, 102, 241, 0.3),
-              0 0 60px rgba(99, 102, 241, 0.1);
-}
-
-.glow-purple {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5),
-              0 0 40px rgba(168, 85, 247, 0.3),
-              0 0 60px rgba(168, 85, 247, 0.1);
+.glow-gemini {
+  box-shadow: 0 0 20px rgba(75, 144, 255, 0.3),
+              0 0 40px rgba(75, 144, 255, 0.1);
 }
 
 /* Glass effect */
 .glass {
-  @apply bg-slate-900/80 backdrop-blur-xl border border-slate-700/50;
+  @apply bg-gemini-sidebar/80 backdrop-blur-xl border border-gemini-border;
 }
 
 /* Gradient text */
-.gradient-text {
-  @apply bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent;
+.gradient-text-gemini {
+  @apply bg-gradient-to-r from-gemini-blue via-gemini-purple to-pink-400 bg-clip-text text-transparent;
 }

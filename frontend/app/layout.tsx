@@ -16,7 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${epilogue.className} bg-vox-black text-slate-100`}>
+      <body className={`${epilogue.className} bg-gemini-bg text-slate-100`}>
         {children}
       </body>
     </html>

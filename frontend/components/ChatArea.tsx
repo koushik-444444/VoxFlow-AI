@@ -23,59 +23,53 @@ export function ChatArea() {
   return (
     <div
       ref={scrollRef}
-      className="flex-1 overflow-y-auto px-8 py-6 space-y-8 scroll-smooth relative z-10"
+      className="flex-1 overflow-y-auto px-4 py-8 md:px-0 scroll-smooth relative z-10 custom-scrollbar"
     >
-      <AnimatePresence mode="popLayout">
-        {!currentConversation && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl mx-auto pt-10 pb-20"
-          >
-            <h2 className="text-5xl font-black tracking-tighter text-white mb-4 leading-tight">
-              Create, explore,<br />be inspired
-            </h2>
-            
-            {/* Search Mockup from Image 1 */}
-            <div className="relative mt-8 group">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none">
-                <svg className="w-5 h-5 text-slate-500 group-focus-within:text-vox-purple transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="w-full bg-vox-gray/50 border-2 border-vox-light hover:border-vox-gray focus:border-vox-purple focus:outline-none rounded-[24px] py-5 pl-14 pr-6 text-white font-medium transition-all"
-              />
-            </div>
-
-            {/* Quick Actions from Image 1 */}
-            <div className="grid grid-cols-2 gap-4 mt-8">
-              <div 
-                onClick={() => setService('writer')}
-                className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl active:scale-95"
-              >
-                <p className="font-black text-xl text-white mb-10 leading-tight">AI text<br />writer</p>
-                <div className="flex justify-end">
-                  <div className="w-10 h-10 rounded-full bg-vox-light flex items-center justify-center group-hover:bg-vox-purple transition-all">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+      <div className="max-w-3xl mx-auto w-full space-y-8">
+        <AnimatePresence mode="popLayout">
+          {!currentConversation && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-20 flex flex-col items-center"
+            >
+              <h2 className="text-4xl md:text-6xl font-medium tracking-tight mb-4 text-left w-full px-6">
+                <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hello, User</span>
+                <br />
+                <span className="text-gemini-muted">How can I help you today?</span>
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-12 w-full px-6">
+                <div 
+                  onClick={() => setService('writer')}
+                  className="p-6 rounded-[24px] bg-gemini-sidebar border border-gemini-border hover:bg-gemini-hover transition-all cursor-pointer group flex flex-col justify-between h-48"
+                >
+                  <p className="text-lg text-gemini-text">Write a creative story or helpful content</p>
+                  <div className="flex justify-end">
+                    <div className="w-10 h-10 rounded-full bg-gemini-bg flex items-center justify-center group-hover:text-gemini-blue transition-all">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 rounded-[24px] bg-gemini-sidebar border border-gemini-border hover:bg-gemini-hover transition-all cursor-pointer group flex flex-col justify-between h-48 opacity-60">
+                  <p className="text-lg text-gemini-text">Explore more possibilities coming soon</p>
+                  <div className="flex justify-end">
+                    <div className="w-10 h-10 rounded-full bg-gemini-bg flex items-center justify-center">
+                      <Bot className="w-5 h-5" />
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="p-6 rounded-[32px] bg-vox-gray border border-vox-light hover:bg-vox-light transition-all cursor-pointer group shadow-xl">
-                <p className="font-black text-xl text-white mb-10 leading-tight">AI image<br />generator</p>
-                <div className="flex justify-end">
-                  <div className="w-10 h-10 rounded-full bg-vox-light flex items-center justify-center group-hover:bg-vox-purple transition-all">
-                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
-        {currentConversation?.messages.map((message, index) => (
+          {currentConversation?.messages.map((message, index) => (
+            <MessageBubble
+              key={message.id}
+              message={message}
+              index={index}
+            />
+          ))}
           <MessageBubble
             key={message.id}
             message={message}
@@ -85,46 +79,37 @@ export function ChatArea() {
 
         {(isRecording || isTranscribing) && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="flex items-start gap-4"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-start gap-4 px-6 md:px-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-vox-gradient flex items-center justify-center flex-shrink-0 shadow-lg shadow-vox-purple/20">
-              <User className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-full bg-gemini-hover flex items-center justify-center flex-shrink-0">
+              <User className="w-5 h-5 text-gemini-blue" />
             </div>
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-vox-gray border border-vox-light shadow-xl">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                <span className="w-2 h-2 bg-vox-purple rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-              </div>
-              <span className="text-sm text-slate-300 font-medium">
+            <div className="flex-1 py-2">
+              <p className="text-gemini-text italic animate-pulse">
                 {isRecording ? 'Listening...' : 'Transcribing...'}
-              </span>
+              </p>
             </div>
           </motion.div>
         )}
 
         {assistantIsThinking && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex flex-row-reverse items-start gap-4"
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-start gap-4 px-6 md:px-0"
           >
-            <div className="w-10 h-10 rounded-xl bg-vox-light border border-vox-gray flex items-center justify-center flex-shrink-0">
-              <Bot className="w-5 h-5 text-vox-rose" />
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-6 h-6 bg-gemini-gradient rounded-full animate-spin-slow blur-[2px] opacity-80" />
             </div>
-            <div className="flex items-center gap-3 px-5 py-4 rounded-2xl bg-vox-gray border border-vox-light shadow-xl">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-vox-rose rounded-full animate-pulse" />
-              </div>
-              <span className="text-sm text-slate-300 font-medium">VoxFlow is thinking...</span>
+            <div className="flex-1 py-2">
+              <span className="text-gemini-muted">VoxFlow is thinking...</span>
             </div>
           </motion.div>
         )}
-
       </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -158,52 +143,40 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
-      className={`flex items-start gap-4 ${isUser ? 'flex-row' : 'flex-row-reverse'}`}
+      transition={{ delay: 0.1 }}
+      className={`flex items-start gap-4 px-6 md:px-0 ${isUser ? 'flex-row' : 'flex-row'}`}
     >
       {/* Avatar */}
       <div
-        className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
+        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
           isUser
-            ? 'bg-vox-gradient shadow-vox-purple/20'
-            : 'bg-vox-light border border-vox-gray shadow-black/40'
+            ? 'bg-gemini-hover'
+            : ''
         }`}
       >
         {isUser ? (
-          <User className="w-5 h-5 text-white" />
+          <User className="w-5 h-5 text-gemini-blue" />
         ) : (
-          <Bot className={`w-5 h-5 ${isUser ? 'text-white' : 'text-vox-rose'}`} />
+          <div className="w-6 h-6 bg-gemini-gradient rounded-full" />
         )}
       </div>
 
       {/* Message Content */}
-      <div
-        className={`group relative max-w-[80%] px-6 py-4 rounded-3xl shadow-xl ${
-          isUser
-            ? 'bg-vox-gradient text-white'
-            : 'bg-vox-gray border border-vox-light text-slate-200'
-        }`}
-      >
-        {/* Text */}
-        <p className="text-[15px] leading-relaxed whitespace-pre-wrap font-medium">
+      <div className="flex-1 min-w-0 py-2">
+        <p className="text-[16px] leading-[1.6] text-gemini-text whitespace-pre-wrap">
           {message.content}
           {isStreaming && (
-            <span className="inline-block w-2 h-4 ml-1 bg-current animate-pulse" />
+            <span className="inline-block w-1.5 h-5 ml-1 bg-gemini-blue animate-pulse align-middle" />
           )}
         </p>
 
         {/* Actions */}
-        <div
-          className={`absolute ${
-            isUser ? 'left-0 -translate-x-full' : 'right-0 translate-x-full'
-          } top-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 px-3`}
-        >
+        <div className="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <button
             onClick={handleCopy}
-            className="p-2 rounded-xl bg-vox-gray border border-vox-light text-slate-400 hover:text-vox-purple transition-all"
-            title="Copy"
+            className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
           </button>
@@ -211,25 +184,12 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
           {!isUser && message.audioUrl && (
             <button
               onClick={handlePlay}
-              className="p-2 rounded-xl bg-vox-gray border border-vox-light text-slate-400 hover:text-vox-rose transition-all"
-              title="Play"
+              className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
             >
               {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
             </button>
           )}
         </div>
-
-        {/* Timestamp */}
-        <span
-          className={`text-[10px] mt-2 block font-bold uppercase tracking-wider ${
-            isUser ? 'text-white/60' : 'text-slate-500'
-          }`}
-        >
-          {new Date(message.timestamp).toLocaleTimeString([], {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </span>
       </div>
     </motion.div>
   )

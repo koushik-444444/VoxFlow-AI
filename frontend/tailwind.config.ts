@@ -10,6 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        gemini: {
+          bg: '#131314',
+          sidebar: '#1e1f20',
+          hover: '#28292a',
+          blue: '#4b90ff',
+          purple: '#d0bcff',
+          text: '#e3e3e3',
+          muted: '#8e918f',
+          border: '#444746',
+        },
         vox: {
           purple: '#ac1ed6',
           rose: '#c26e73',
