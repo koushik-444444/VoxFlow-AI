@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { useMicVAD } from '@ricky0123/vad-react'
 import { useStore } from '@/store/useStore'
-import { toast } from '@/components/ui/Toaster'
 
 export function useVAD() {
   const wsStatus = useStore((s) => s.wsStatus)
@@ -62,11 +61,7 @@ export function useVAD() {
     if (vad.loading) {
       setVADStatus('loading')
     } else if (vad.errored) {
-      const errMsg = typeof vad.errored === 'object' ? (vad.errored as any).message : String(vad.errored)
       console.error('[VAD] Hook error:', vad.errored)
-      if (isVADEnabled) {
-        toast.error(`Hands-Free Error: ${errMsg}`)
-      }
       setVADStatus('error')
     } else if (isVADEnabled && wsStatus === 'connected') {
       setVADStatus('active')

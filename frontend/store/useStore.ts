@@ -123,9 +123,9 @@ interface AppState {
   isVADEnabled: boolean
   vadStatus: 'loading' | 'active' | 'error' | 'idle'
   showSettings: boolean
+  setShowSettings: (value: boolean) => void
   setVADEnabled: (value: boolean) => void
   setVADStatus: (status: 'loading' | 'active' | 'error' | 'idle') => void
-  setShowSettings: (value: boolean) => void
   setService: (service: 'chat' | 'writer') => void
   setWriterContent: (content: string) => void
   toggleSidebar: () => void
@@ -482,9 +482,9 @@ export const useStore = create<AppState>()(
       vadStatus: 'idle',
       showSettings: false,
 
+      setShowSettings: (value) => set({ showSettings: value }),
       setVADEnabled: (value) => set({ isVADEnabled: value }),
       setVADStatus: (status) => set({ vadStatus: status }),
-      setShowSettings: (value) => set({ showSettings: value }),
       setService: (service) => set({ activeService: service }),
       setWriterContent: (content) => set({ writerContent: content }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

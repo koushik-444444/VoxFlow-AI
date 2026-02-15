@@ -161,6 +161,17 @@ export function ControlPanel() {
 
         {/* Right Actions */}
         <div className="flex items-center gap-1">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowSettings(!showSettings)}
+            aria-label="Toggle settings"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-gemini-muted hover:text-gemini-text rounded-xl hover:bg-gemini-hover transition-all text-xs font-medium"
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`} />
+          </motion.button>
+
           {inputText.trim() ? (
             <motion.button
               initial={{ scale: 0 }}
@@ -174,45 +185,32 @@ export function ControlPanel() {
               <ArrowUp className="w-4 h-4" />
             </motion.button>
           ) : (
-            <>
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => setShowSettings(!showSettings)}
-                aria-label="Toggle settings"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-gemini-muted hover:text-gemini-text rounded-xl hover:bg-gemini-hover transition-all text-xs font-medium"
-              >
-                <Settings2 className="w-3.5 h-3.5" />
-                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`} />
-              </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleToggle}
+              disabled={!isConnected}
+              aria-label={isRecording ? 'Stop recording' : 'Start recording'}
+              className={`relative p-2.5 rounded-xl transition-all ${
+                isRecording
+                  ? 'bg-gemini-gradient text-white shadow-lg shadow-gemini-blue/30'
+                  : 'text-gemini-blue hover:bg-gemini-blue/10'
+              } disabled:opacity-30`}
+            >
+              {isRecording ? (
+                <Square className="w-4 h-4 fill-white" />
+              ) : (
+                <Mic className="w-5 h-5" />
+              )}
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.9 }}
-                onClick={handleToggle}
-                disabled={!isConnected}
-                aria-label={isRecording ? 'Stop recording' : 'Start recording'}
-                className={`relative p-2.5 rounded-xl transition-all ${
-                  isRecording
-                    ? 'bg-gemini-gradient text-white shadow-lg shadow-gemini-blue/30'
-                    : 'text-gemini-blue hover:bg-gemini-blue/10'
-                } disabled:opacity-30`}
-              >
-                {isRecording ? (
-                  <Square className="w-4 h-4 fill-white" />
-                ) : (
-                  <Mic className="w-5 h-5" />
-                )}
-
-                {/* Pulse rings when recording */}
-                {isRecording && (
-                  <>
-                    <span className="absolute inset-0 rounded-xl bg-gemini-blue/20 mic-pulse-ring" />
-                    <span className="absolute inset-0 rounded-xl bg-gemini-blue/10 mic-pulse-ring" style={{ animationDelay: '0.5s' }} />
-                  </>
-                )}
-              </motion.button>
-            </>
+              {/* Pulse rings when recording */}
+              {isRecording && (
+                <>
+                  <span className="absolute inset-0 rounded-xl bg-gemini-blue/20 mic-pulse-ring" />
+                  <span className="absolute inset-0 rounded-xl bg-gemini-blue/10 mic-pulse-ring" style={{ animationDelay: '0.5s' }} />
+                </>
+              )}
+            </motion.button>
           )}
         </div>
       </div>
