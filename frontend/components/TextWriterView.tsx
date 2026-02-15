@@ -199,9 +199,9 @@ export function TextWriterView() {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-                  className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center mb-6 overflow-hidden"
+                  className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center mb-6 overflow-hidden p-3"
                 >
-                  <img src="/voxflow-bot.png" alt="VoxFlow Bot" className="w-full h-full object-cover" />
+                  <img src="/voxflow-logo.png" alt="VoxFlow Logo" className="w-full h-full object-contain invert" />
                 </motion.div>
                 <h3 className="text-3xl md:text-4xl font-bold tracking-tight">
                   {isRecording ? (

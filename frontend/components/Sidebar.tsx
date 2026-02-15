@@ -64,8 +64,8 @@ export function Sidebar() {
               onClick={createConversation}
               className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl glass-card hover:bg-gemini-hover text-gemini-text font-medium transition-all group glow-blue"
             >
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center overflow-hidden">
-                <img src="/voxflow-bot.png" alt="VoxFlow Bot" className="w-full h-full object-cover" />
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center overflow-hidden p-1.5">
+                <img src="/voxflow-logo.png" alt="VoxFlow Logo" className="w-full h-full object-contain invert" />
               </div>
               <span className="text-sm">New conversation</span>
             </motion.button>

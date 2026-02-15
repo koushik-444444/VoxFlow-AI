@@ -64,12 +64,17 @@ export default function Home() {
                       </svg>
                     </button>
                   )}
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink animate-gradient bg-[length:200%_200%] drop-shadow-[0_0_15px_rgba(75,144,255,0.3)]">
-                      VoxFlow
-                    </h1>
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gemini-blue/10 text-[12px] font-bold text-gemini-blue border border-gemini-blue/20 uppercase tracking-widest">
-                      AI
+                   <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl overflow-hidden glass-card p-1.5 flex items-center justify-center">
+                      <img src="/voxflow-logo.png" alt="Logo" className="w-full h-full object-contain invert" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink animate-gradient bg-[length:200%_200%] drop-shadow-[0_0_15px_rgba(75,144,255,0.3)]">
+                        VoxFlow
+                      </h1>
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gemini-blue/10 text-[12px] font-bold text-gemini-blue border border-gemini-blue/20 uppercase tracking-widest">
+                        AI
+                      </div>
                     </div>
                   </div>
                 </div>
