@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, Square, Settings2, RefreshCw, Plus, ChevronDown, Wrench } from 'lucide-react'
+import { Mic, MicOff, Square, Settings2, RefreshCw, Plus, ChevronDown, Wrench, ArrowUp } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
@@ -15,10 +15,12 @@ export function ControlPanel() {
     initializeSession,
     setIsTranscribing,
     wsConnection,
-    assistantIsThinking
+    assistantIsThinking,
+    sendTextMessage
   } = useStore()
 
   const [showSettings, setShowSettings] = useState(false)
+  const [inputText, setInputText] = useState('')
 
   const {
     startRecording,
@@ -51,6 +53,20 @@ export function ControlPanel() {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
       startRecording()
+    }
+  }
+
+  const handleSendText = () => {
+    if (inputText.trim()) {
+      sendTextMessage(inputText.trim())
+      setInputText('')
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendText()
     }
   }
 
@@ -93,46 +109,66 @@ export function ControlPanel() {
           <span>Tools</span>
         </button>
 
-        {/* Text Placeholder / Status */}
-        <div className="flex-1 px-2 overflow-hidden">
-          <p className="text-[#8e918f] truncate text-[16px]">
-            {isRecording ? (
-              <span className="text-white animate-pulse">Listening...</span>
-            ) : assistantIsThinking ? (
-              <span className="bg-gemini-gradient bg-clip-text text-transparent font-medium">VoxFlow is thinking...</span>
-            ) : (
-              'Ask Gemini 3'
-            )}
-          </p>
+        {/* Text Input / Status */}
+        <div className="flex-1 px-2 overflow-hidden flex items-center">
+          {isRecording ? (
+             <p className="text-[#8e918f] truncate text-[16px]">
+               <span className="text-white animate-pulse">Listening...</span>
+             </p>
+          ) : assistantIsThinking ? (
+            <p className="text-[#8e918f] truncate text-[16px]">
+               <span className="bg-gemini-gradient bg-clip-text text-transparent font-medium">VoxFlow is thinking...</span>
+            </p>
+          ) : (
+            <input
+              type="text"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask Gemini 3"
+              className="w-full bg-transparent border-none outline-none text-[#e3e3e3] placeholder-[#8e918f] text-[16px] py-1"
+            />
+          )}
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-1">
-          <button 
-            onClick={() => setShowSettings(!showSettings)}
-            className="hidden md:flex items-center gap-1 px-3 py-1.5 text-[#c4c7c5] hover:text-white hover:bg-[#333537] rounded-full transition-all text-sm font-medium"
-          >
-            <span>Pro</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
+          {inputText.trim() ? (
+            <button
+              onClick={handleSendText}
+              className="p-3 text-blue-400 hover:bg-[#333537] rounded-full transition-all"
+            >
+              <ArrowUp className="w-6 h-6" />
+            </button>
+          ) : (
+            <>
+              <button 
+                onClick={() => setShowSettings(!showSettings)}
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 text-[#c4c7c5] hover:text-white hover:bg-[#333537] rounded-full transition-all text-sm font-medium"
+              >
+                <span>Pro</span>
+                <ChevronDown className="w-4 h-4" />
+              </button>
 
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={handleToggle}
-            disabled={!isConnected}
-            className={`p-3 rounded-full transition-all ${
-              isRecording
-                ? 'bg-gemini-gradient text-white shadow-lg'
-                : 'text-blue-400 hover:bg-[#333537]'
-            } disabled:opacity-30`}
-          >
-            {isRecording ? (
-              <Square className="w-5 h-5 fill-white" />
-            ) : (
-              <Mic className="w-6 h-6" />
-            )}
-          </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={handleToggle}
+                disabled={!isConnected}
+                className={`p-3 rounded-full transition-all ${
+                  isRecording
+                    ? 'bg-gemini-gradient text-white shadow-lg'
+                    : 'text-blue-400 hover:bg-[#333537]'
+                } disabled:opacity-30`}
+              >
+                {isRecording ? (
+                  <Square className="w-5 h-5 fill-white" />
+                ) : (
+                  <Mic className="w-6 h-6" />
+                )}
+              </motion.button>
+            </>
+          )}
         </div>
       </div>
 

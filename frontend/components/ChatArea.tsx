@@ -33,7 +33,7 @@ export function ChatArea() {
               animate={{ opacity: 1, y: 0 }}
               className="py-20 flex flex-col items-center justify-center min-h-[60vh]"
             >
-              <div className="w-full max-w-2xl px-6">
+              <div className="w-full max-w-2xl px-6 text-left">
                 <h2 className="text-5xl font-medium tracking-tight mb-8">
                   <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hi Koushik</span>
                   <br />
@@ -60,38 +60,38 @@ export function ChatArea() {
             />
           ))}
 
-        {(isRecording || isTranscribing) && (
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-start gap-4 px-6 md:px-0"
-          >
-            <div className="w-10 h-10 rounded-full bg-gemini-hover flex items-center justify-center flex-shrink-0">
-              <User className="w-5 h-5 text-gemini-blue" />
-            </div>
-            <div className="flex-1 py-2">
-              <p className="text-gemini-text italic animate-pulse">
-                {isRecording ? 'Listening...' : 'Transcribing...'}
-              </p>
-            </div>
-          </motion.div>
-        )}
+          {(isRecording || isTranscribing) && (
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-start gap-4 px-6 md:px-0"
+            >
+              <div className="w-10 h-10 rounded-full bg-[#1e1f20] flex items-center justify-center flex-shrink-0 text-white font-bold border border-white/10">
+                K
+              </div>
+              <div className="flex-1 py-2">
+                <p className="text-[#e3e3e3] italic animate-pulse">
+                  {isRecording ? 'Listening...' : 'Transcribing...'}
+                </p>
+              </div>
+            </motion.div>
+          )}
 
-        {assistantIsThinking && (
-          <motion.div
-            initial={{ opacity: 0, x: 10 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-start gap-4 px-6 md:px-0"
-          >
-            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
-              <div className="w-6 h-6 bg-gemini-gradient rounded-full animate-spin-slow blur-[2px] opacity-80" />
-            </div>
-            <div className="flex-1 py-2">
-              <span className="text-gemini-muted">VoxFlow is thinking...</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          {assistantIsThinking && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-start gap-4 px-6 md:px-0"
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 bg-gemini-gradient rounded-full animate-spin-slow blur-[1px] opacity-80" />
+              </div>
+              <div className="flex-1 py-2">
+                <span className="text-[#8e918f]">VoxFlow is thinking...</span>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

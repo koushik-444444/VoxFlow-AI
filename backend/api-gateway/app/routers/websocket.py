@@ -163,6 +163,14 @@ async def audio_stream_websocket(
                         else:
                             logger.warn("Received end_of_speech but audio buffer is empty")
                         
+                    elif msg_type == "text_message":
+                        text = data.get("text", "").strip()
+                        if text:
+                            logger.info("Received text message", text=text)
+                            await process_complete_transcription(
+                                session_id, text, websocket
+                            )
+                        
                     elif msg_type == "interrupt":
                         audio_buffer.clear()
                         await websocket.send_json({"type": "interrupted"})

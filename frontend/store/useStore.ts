@@ -50,6 +50,7 @@ interface AppState {
   disconnectWebSocket: () => void
   sendAudioChunk: (data: Blob) => void
   sendInterrupt: () => void
+  sendTextMessage: (text: string) => void
 
   // Settings
   selectedModel: string
@@ -313,6 +314,23 @@ export const useStore = create<AppState>()(
         const { wsConnection, wsStatus } = get()
         if (wsConnection && wsStatus === 'connected') {
           wsConnection.send(JSON.stringify({ type: 'interrupt' }))
+        }
+      },
+
+      sendTextMessage: (text: string) => {
+        const { wsConnection, wsStatus } = get()
+        if (wsConnection && wsStatus === 'connected') {
+          console.log('Sending text message:', text)
+          wsConnection.send(JSON.stringify({ type: 'text_message', text }))
+          
+          // Add user message to UI immediately
+          get().addMessage({
+            role: 'user',
+            content: text,
+          })
+          set({ assistantIsThinking: true })
+        } else {
+          console.warn('Cannot send text message: WebSocket not connected', wsStatus)
         }
       },
 
