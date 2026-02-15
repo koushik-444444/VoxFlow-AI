@@ -75,7 +75,7 @@ export function ControlPanel() {
   const isConnecting = wsStatus === 'connecting'
 
   return (
-    <div className="pb-8 pt-2 px-4 md:px-0 w-full max-w-3xl mx-auto z-20">
+    <div className="flex-shrink-0 pb-8 pt-2 px-4 md:px-0 w-full max-w-3xl mx-auto z-20">
       {/* Settings Bar */}
       <AnimatePresence>
         {showSettings && (

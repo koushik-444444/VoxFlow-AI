@@ -30,7 +30,7 @@ export default function Home() {
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col relative">
+      <main className="flex-1 flex flex-col min-h-0 relative">
         <AnimatePresence mode="wait">
           {activeService === 'writer' ? (
             <TextWriterView key="writer" />
@@ -40,7 +40,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col relative"
+              className="flex-1 flex flex-col min-h-0 h-full"
             >
               {/* Header */}
               <motion.header

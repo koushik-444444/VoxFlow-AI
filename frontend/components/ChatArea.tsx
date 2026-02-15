@@ -32,7 +32,7 @@ export function ChatArea() {
       role="log"
       aria-label="Chat messages"
       aria-live="polite"
-      className="flex-1 overflow-y-auto px-4 py-8 md:px-0 scroll-smooth relative z-10 custom-scrollbar"
+      className="flex-1 overflow-y-auto min-h-0 px-4 py-8 md:px-0 scroll-smooth relative z-10 custom-scrollbar"
     >
       <div className="max-w-3xl mx-auto w-full space-y-8">
         <AnimatePresence mode="popLayout">
