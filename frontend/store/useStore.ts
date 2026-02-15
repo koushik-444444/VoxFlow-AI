@@ -484,9 +484,24 @@ function handleWebSocketMessage(
           }
           const audioBlob = new Blob([bytes], { type: 'audio/wav' })
           const audioUrl = URL.createObjectURL(audioBlob)
+          
+          // Find the latest assistant message to attach the audio to
+          const currentConversation = state.conversations.find(c => c.id === state.currentConversationId)
+          if (currentConversation) {
+            const assistantMessages = currentConversation.messages.filter(m => m.role === 'assistant')
+            const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+            if (lastAssistantMessage) {
+              state.updateMessage(lastAssistantMessage.id, { audioUrl })
+              state.setPlaybackStatus('playing', lastAssistantMessage.id)
+            } else {
+              state.setPlaybackStatus('playing', 'auto-play')
+            }
+          } else {
+            state.setPlaybackStatus('playing', 'auto-play')
+          }
+
           const audio = new Audio(audioUrl)
           audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          state.setPlaybackStatus('playing', 'auto-play')
           audio.onended = () => {
             state.setPlaybackStatus('stopped', null)
             URL.revokeObjectURL(audioUrl)
@@ -518,9 +533,24 @@ function handleWebSocketMessage(
           ttsAudioChunks = []
           const audioBlob = new Blob([merged], { type: 'audio/mpeg' })
           const audioUrl = URL.createObjectURL(audioBlob)
+
+          // Find the latest assistant message to attach the audio to
+          const currentConversation = state.conversations.find(c => c.id === state.currentConversationId)
+          if (currentConversation) {
+            const assistantMessages = currentConversation.messages.filter(m => m.role === 'assistant')
+            const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
+            if (lastAssistantMessage) {
+              state.updateMessage(lastAssistantMessage.id, { audioUrl })
+              state.setPlaybackStatus('playing', lastAssistantMessage.id)
+            } else {
+              state.setPlaybackStatus('playing', 'auto-play')
+            }
+          } else {
+            state.setPlaybackStatus('playing', 'auto-play')
+          }
+
           const audio = new Audio(audioUrl)
           audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          state.setPlaybackStatus('playing', 'auto-play')
           audio.onended = () => {
             state.setPlaybackStatus('stopped', null)
             URL.revokeObjectURL(audioUrl)
