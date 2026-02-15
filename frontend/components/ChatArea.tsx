@@ -193,7 +193,7 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.05, duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-      className={`flex items-start gap-3 px-4 md:px-0 group ${isUser ? '' : ''}`}
+      className={`flex items-start gap-3 px-4 md:px-0 group ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
     >
       {/* Avatar */}
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
@@ -209,13 +209,13 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
       </div>
 
       {/* Message Content */}
-      <div className="flex-1 min-w-0 py-1">
+      <div className={`flex-1 min-w-0 py-1 ${isUser ? 'text-right' : 'text-left'}`}>
         <h3 className="text-lg font-bold text-gemini-blue mb-1">
           {isUser ? 'You' : 'VoxFlow'}
         </h3>
-        <div className={`rounded-2xl px-4 py-3 ${
+        <div className={`rounded-2xl px-4 py-3 inline-block max-w-full ${
           isUser
-            ? 'glass-card'
+            ? 'glass-card text-left'
             : 'bg-transparent'
         }`}>
           <p className="text-[15px] leading-relaxed text-gemini-text whitespace-pre-wrap">
@@ -227,7 +227,7 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-0.5 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ml-1">
+        <div className={`flex items-center gap-0.5 mt-1.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 ${isUser ? 'justify-end' : 'justify-start'} ml-1`}>
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
