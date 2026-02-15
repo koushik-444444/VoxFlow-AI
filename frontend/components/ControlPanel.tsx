@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, Square, RefreshCw, ChevronDown, Wrench, ArrowUp, Settings2 } from 'lucide-react'
+import { Mic, Square, RefreshCw, ChevronDown, Wrench, ArrowUp, Settings2, Ghost } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
@@ -86,9 +86,12 @@ export function ControlPanel() {
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             className="mb-3 p-5 glass-panel rounded-2xl"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
               <VoiceSelector />
               <ModelInfo />
+            </div>
+            <div className="pt-4 border-t border-gemini-border">
+              <VADToggle />
             </div>
           </motion.div>
         )}
@@ -262,3 +265,36 @@ function ModelInfo() {
     </div>
   )
 }
+
+function VADToggle() {
+  const isVADEnabled = useStore((s) => s.isVADEnabled)
+  const setVADEnabled = useStore((s) => s.setVADEnabled)
+  
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gemini-blue/10 flex items-center justify-center">
+          <Ghost className={`w-5 h-5 ${isVADEnabled ? 'text-gemini-blue' : 'text-gemini-muted'}`} />
+        </div>
+        <div>
+          <h3 className="text-sm font-bold text-gemini-text">Hands-Free Mode</h3>
+          <p className="text-[10px] text-gemini-muted italic">*Auto-detect voice & interruptions*</p>
+        </div>
+      </div>
+      
+      <button
+        onClick={() => setVADEnabled(!isVADEnabled)}
+        className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
+          isVADEnabled ? 'bg-gemini-blue' : 'bg-gemini-hover'
+        }`}
+      >
+        <motion.div
+          animate={{ x: isVADEnabled ? 26 : 2 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+        />
+      </button>
+    </div>
+  )
+}
+

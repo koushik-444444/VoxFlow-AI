@@ -120,6 +120,8 @@ interface AppState {
   isTranscribing: boolean
   assistantIsThinking: boolean
   writerContent: string
+  isVADEnabled: boolean
+  setVADEnabled: (value: boolean) => void
   setService: (service: 'chat' | 'writer') => void
   setWriterContent: (content: string) => void
   toggleSidebar: () => void
@@ -472,7 +474,9 @@ export const useStore = create<AppState>()(
       isTranscribing: false,
       assistantIsThinking: false,
       writerContent: '',
+      isVADEnabled: true,
 
+      setVADEnabled: (value) => set({ isVADEnabled: value }),
       setService: (service) => set({ activeService: service }),
       setWriterContent: (content) => set({ writerContent: content }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
