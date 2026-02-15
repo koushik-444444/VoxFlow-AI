@@ -121,7 +121,9 @@ interface AppState {
   assistantIsThinking: boolean
   writerContent: string
   isVADEnabled: boolean
+  vadStatus: 'loading' | 'active' | 'error' | 'idle'
   setVADEnabled: (value: boolean) => void
+  setVADStatus: (status: 'loading' | 'active' | 'error' | 'idle') => void
   setService: (service: 'chat' | 'writer') => void
   setWriterContent: (content: string) => void
   toggleSidebar: () => void
@@ -475,8 +477,10 @@ export const useStore = create<AppState>()(
       assistantIsThinking: false,
       writerContent: '',
       isVADEnabled: true,
+      vadStatus: 'idle',
 
       setVADEnabled: (value) => set({ isVADEnabled: value }),
+      setVADStatus: (status) => set({ vadStatus: status }),
       setService: (service) => set({ activeService: service }),
       setWriterContent: (content) => set({ writerContent: content }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),

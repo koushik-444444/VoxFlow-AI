@@ -1,29 +1,19 @@
 import { useEffect } from 'react'
 import { useMicVAD } from '@ricky0123/vad-react'
-import { utils } from '@ricky0123/vad-web'
 import { useStore } from '@/store/useStore'
-import { toast } from '@/components/ui/Toaster'
 
 export function useVAD() {
   const wsStatus = useStore((s) => s.wsStatus)
-  const wsConnection = useStore((s) => s.wsConnection)
-  const sendAudioChunk = useStore((s) => s.sendAudioChunk)
   const isVADEnabled = useStore((s) => s.isVADEnabled)
-  const isPlaying = useStore((s) => s.isPlaying)
-  const stopAudio = useStore((s) => s.stopAudio)
-  const sendInterrupt = useStore((s) => s.sendInterrupt)
-  const setIsRecording = useStore((s) => s.setIsRecording)
-  const setIsTranscribing = useStore((s) => s.setIsTranscribing)
+  const setVADStatus = useStore((s) => s.setVADStatus)
 
   const vad = useMicVAD({
     startOnLoad: true,
     onSpeechStart: () => {
-      // Don't act if VAD is disabled or WS not connected
       const state = useStore.getState()
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
-      console.log('Speech started')
-      // Implementation of Interruption: If AI is speaking, stop it.
+      console.log('[VAD] Speech started')
       if (state.isPlaying) {
         state.stopAudio()
         state.sendInterrupt()
@@ -34,11 +24,11 @@ export function useVAD() {
       }
       state.setIsRecording(true)
     },
-    onSpeechEnd: (audio) => {
+    onSpeechEnd: () => {
       const state = useStore.getState()
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
-      console.log('Speech ended')
+      console.log('[VAD] Speech ended')
       state.setIsRecording(false)
       state.setIsTranscribing(true)
       
@@ -46,28 +36,43 @@ export function useVAD() {
         state.wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
       }
     },
-    onFrameProcessed: (probs, frame) => {
+    onFrameProcessed: (probs: { isSpeech: number; notSpeech: number }, frame: Float32Array) => {
       const state = useStore.getState()
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
-      // Send audio frames to the server if speech is detected
       if (probs.isSpeech > 0.5) {
-        // Convert SharedArrayBuffer to a standard Blob compatible format if needed
+        // Convert the Float32Array frame to a Blob safely.
         const blob = new Blob([frame as any], { type: 'application/octet-stream' })
         state.sendAudioChunk(blob)
       }
-    }
-  })
+    },
+    workletURL: '/vad.worklet.bundle.js',
+    modelURL: '/silero_vad.onnx',
+    positiveSpeechThreshold: 0.6,
+    negativeSpeechThreshold: 0.4,
+    minSpeechFrames: 3,
+    preSpeechPadFrames: 5,
+  } as any)
 
-  // Control VAD state based on settings
   useEffect(() => {
-    if (isVADEnabled && wsStatus === 'connected') {
-      vad.pause() // Reset/Ensure it starts fresh if needed or just use start/pause
-      vad.start()
+    if (vad.loading) {
+      setVADStatus('loading')
+    } else if (vad.errored) {
+      console.error('[VAD] Hook error:', vad.errored)
+      setVADStatus('error')
+    } else if (isVADEnabled && wsStatus === 'connected') {
+      setVADStatus('active')
+      // Only start if not already listening
+      if (!vad.listening) {
+        vad.start()
+      }
     } else {
-      vad.pause()
+      setVADStatus('idle')
+      if (vad.listening) {
+        vad.pause()
+      }
     }
-  }, [isVADEnabled, wsStatus])
+  }, [vad.loading, vad.errored, vad.listening, isVADEnabled, wsStatus])
 
   return vad
 }

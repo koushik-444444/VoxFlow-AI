@@ -269,24 +269,43 @@ function ModelInfo() {
 function VADToggle() {
   const isVADEnabled = useStore((s) => s.isVADEnabled)
   const setVADEnabled = useStore((s) => s.setVADEnabled)
+  const vadStatus = useStore((s) => s.vadStatus)
   
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-gemini-blue/10 flex items-center justify-center">
-          <Ghost className={`w-5 h-5 ${isVADEnabled ? 'text-gemini-blue' : 'text-gemini-muted'}`} />
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+          vadStatus === 'active' ? 'bg-gemini-blue/10' : 
+          vadStatus === 'loading' ? 'bg-amber-500/10' :
+          vadStatus === 'error' ? 'bg-red-500/10' :
+          'bg-gemini-hover/50'
+        }`}>
+          <Ghost className={`w-5 h-5 ${
+            vadStatus === 'active' ? 'text-gemini-blue' : 
+            vadStatus === 'loading' ? 'text-amber-500 animate-pulse' :
+            vadStatus === 'error' ? 'text-red-500' :
+            'text-gemini-muted'
+          }`} />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-gemini-text">Hands-Free Mode</h3>
-          <p className="text-[10px] text-gemini-muted italic">*Auto-detect voice & interruptions*</p>
+          <h3 className="text-sm font-bold text-gemini-text flex items-center gap-2">
+            Hands-Free Mode
+            {vadStatus === 'loading' && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-tighter">Loading Model</span>}
+            {vadStatus === 'active' && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-tighter">Ready</span>}
+            {vadStatus === 'error' && <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-tighter">Error</span>}
+          </h3>
+          <p className="text-[10px] text-gemini-muted italic">
+            {vadStatus === 'error' ? '*Microphone or model load failed*' : '*Auto-detect voice & interruptions*'}
+          </p>
         </div>
       </div>
       
       <button
         onClick={() => setVADEnabled(!isVADEnabled)}
+        disabled={vadStatus === 'loading'}
         className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none ${
           isVADEnabled ? 'bg-gemini-blue' : 'bg-gemini-hover'
-        }`}
+        } ${vadStatus === 'loading' ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <motion.div
           animate={{ x: isVADEnabled ? 26 : 2 }}
