@@ -20,6 +20,8 @@ export function Sidebar() {
   const setCurrentConversation = useStore((s) => s.setCurrentConversation)
   const createConversation = useStore((s) => s.createConversation)
   const deleteConversation = useStore((s) => s.deleteConversation)
+  const showSettings = useStore((s) => s.showSettings)
+  const setShowSettings = useStore((s) => s.setShowSettings)
 
   return (
     <AnimatePresence mode="wait">
@@ -132,7 +134,11 @@ export function Sidebar() {
           {/* Footer */}
           <div className="p-2 flex-shrink-0">
             <div className="mx-2 mb-2 h-px bg-gradient-to-r from-transparent via-gemini-border to-transparent" />
-            <SidebarItem icon={<Settings className="w-4 h-4" />} text="Settings" />
+            <SidebarItem 
+              icon={<Settings className="w-4 h-4" />} 
+              text="Settings" 
+              onClick={() => setShowSettings(!showSettings)}
+            />
           </div>
         </motion.aside>
       )}
@@ -157,11 +163,12 @@ export function Sidebar() {
   )
 }
 
-function SidebarItem({ icon, text }: { icon: React.ReactNode, text: string }) {
+function SidebarItem({ icon, text, onClick }: { icon: React.ReactNode, text: string, onClick?: () => void }) {
   return (
     <motion.button 
       whileHover={{ x: 2 }}
       whileTap={{ scale: 0.98 }}
+      onClick={onClick}
       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-gemini-text-secondary hover:text-gemini-text hover:bg-gemini-hover transition-all"
     >
       <span className="text-gemini-muted">{icon}</span>

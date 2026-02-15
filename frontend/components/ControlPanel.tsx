@@ -15,8 +15,9 @@ export function ControlPanel() {
   const wsConnection = useStore((s) => s.wsConnection)
   const assistantIsThinking = useStore((s) => s.assistantIsThinking)
   const sendTextMessage = useStore((s) => s.sendTextMessage)
+  const showSettings = useStore((s) => s.showSettings)
+  const setShowSettings = useStore((s) => s.setShowSettings)
 
-  const [showSettings, setShowSettings] = useState(false)
   const [inputText, setInputText] = useState('')
 
   const {
@@ -171,7 +172,7 @@ export function ControlPanel() {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowSettings(!showSettings)}
                 aria-label="Toggle settings"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-gemini-muted hover:text-gemini-text rounded-xl hover:bg-gemini-hover transition-all text-xs font-medium"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-gemini-muted hover:text-gemini-text rounded-xl hover:bg-gemini-hover transition-all text-xs font-medium"
               >
                 <Settings2 className="w-3.5 h-3.5" />
                 <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showSettings ? 'rotate-180' : ''}`} />
