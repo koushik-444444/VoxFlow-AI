@@ -36,25 +36,29 @@ export function Sidebar() {
         >
           {/* Menu Button */}
           <div className="p-4">
-            <button
+            <motion.button
+              whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+              whileTap={{ scale: 0.9 }}
               onClick={toggleSidebar}
-              className="p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] transition-all"
+              className="p-2 rounded-full text-[#c4c7c5] transition-colors"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-            </button>
+            </motion.button>
           </div>
 
           {/* New Chat Button */}
           <div className="px-4 pb-6 mt-2">
-            <button
+            <motion.button
+              whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)', scale: 1.02 }}
+              whileTap={{ scale: 0.95 }}
               onClick={createConversation}
-              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#131314] hover:bg-[#333537] text-[#e3e3e3] font-medium transition-all group border border-[#444746]"
+              className="flex items-center gap-3 px-4 py-3 rounded-full bg-[#131314] text-[#e3e3e3] font-medium transition-all group border border-[#444746] shadow-sm hover:shadow-md"
             >
-              <Plus className="w-5 h-5 text-blue-400" />
+              <Plus className="w-5 h-5 text-blue-400 group-hover:scale-110 transition-transform" />
               <span className="text-sm">New chat</span>
-            </button>
+            </motion.button>
           </div>
 
           {/* Fixed Categories */}
@@ -69,10 +73,12 @@ export function Sidebar() {
             {conversations.map((conversation) => (
               <motion.div
                 key={conversation.id}
+                whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+                whileTap={{ scale: 0.98 }}
                 className={`group relative flex items-center gap-3 px-4 py-2 rounded-full cursor-pointer transition-all ${
                   currentConversationId === conversation.id
                     ? 'bg-[#004a77] text-[#c2e7ff]'
-                    : 'hover:bg-[#333537] text-[#e3e3e3]'
+                    : 'text-[#e3e3e3]'
                 }`}
                 onClick={() => setCurrentConversation(conversation.id)}
               >
@@ -80,15 +86,17 @@ export function Sidebar() {
                 <p className="text-sm font-medium truncate flex-1">
                   {conversation.title}
                 </p>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.2, color: '#f87171' }}
+                  whileTap={{ scale: 0.8 }}
                   onClick={(e) => {
                     e.stopPropagation()
                     deleteConversation(conversation.id)
                   }}
-                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-black/10 transition-opacity`}
+                  className={`opacity-0 group-hover:opacity-100 p-1 rounded-full hover:bg-black/10 transition-all`}
                 >
                   <Trash2 className="w-3 h-3" />
-                </button>
+                </motion.button>
               </motion.div>
             ))}
           </div>
@@ -103,10 +111,12 @@ export function Sidebar() {
       {/* Toggle button when collapsed */}
       {!sidebarOpen && (
         <motion.button
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)', scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
           onClick={toggleSidebar}
-          className="absolute left-4 top-4 z-50 p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] transition-all"
+          className="absolute left-4 top-4 z-50 p-2 rounded-full text-[#c4c7c5] transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -119,9 +129,13 @@ export function Sidebar() {
 
 function SidebarItem({ icon, text }: { icon: React.ReactNode, text: string }) {
   return (
-    <button className="flex items-center gap-3 w-full px-4 py-2.5 rounded-full hover:bg-[#333537] text-[#e3e3e3] transition-all">
+    <motion.button 
+      whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+      whileTap={{ scale: 0.98 }}
+      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-full text-[#e3e3e3] transition-colors"
+    >
       <span className="text-[#c4c7c5]">{icon}</span>
       <span className="text-sm font-medium">{text}</span>
-    </button>
+    </motion.button>
   )
 }

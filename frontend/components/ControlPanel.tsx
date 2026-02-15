@@ -98,22 +98,33 @@ export function ControlPanel() {
       </AnimatePresence>
 
       {/* Main Input Pill (Gemini Style) */}
-      <div className="relative flex items-center gap-2 bg-[#1e1f20] hover:bg-[#28292a] border border-transparent focus-within:border-[#444746] rounded-[32px] pl-4 pr-2 py-2 shadow-lg transition-all group">
-        {/* Left Actions */}
-        <button className="p-2.5 text-[#c4c7c5] hover:text-white hover:bg-[#333537] rounded-full transition-all">
-          <Plus className="w-5 h-5" />
-        </button>
+      <div className="relative flex items-center gap-2 bg-[#1e1f20] hover:bg-[#28292a] border border-transparent focus-within:border-[#444746] rounded-[32px] pl-4 pr-2 py-2 shadow-lg transition-all group text-[#e3e3e3]">
+        {/* Reset/Interrupt */}
+        <motion.button
+          whileHover={{ scale: 1.1, rotate: 180, backgroundColor: 'rgba(51, 53, 55, 1)' }}
+          whileTap={{ scale: 0.9 }}
+          onClick={handleInterrupt}
+          disabled={!isConnected}
+          className="p-2.5 text-[#c4c7c5] hover:text-white rounded-full transition-all disabled:opacity-20"
+          title="Reset"
+        >
+          <RefreshCw className={`w-5 h-5 ${isConnecting ? 'animate-spin' : ''}`} />
+        </motion.button>
 
-        <button className="hidden md:flex items-center gap-2 px-3 py-1.5 text-[#c4c7c5] hover:text-white hover:bg-[#333537] rounded-full transition-all text-sm font-medium">
+        <motion.button 
+          whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+          whileTap={{ scale: 0.95 }}
+          className="hidden md:flex items-center gap-2 px-3 py-1.5 text-[#c4c7c5] hover:text-white rounded-full transition-colors text-sm font-medium"
+        >
           <Wrench className="w-4 h-4" />
           <span>Tools</span>
-        </button>
+        </motion.button>
 
         {/* Text Input / Status */}
         <div className="flex-1 px-2 overflow-hidden flex items-center">
           {isRecording ? (
              <p className="text-[#8e918f] truncate text-[16px]">
-               <span className="text-white animate-pulse">Listening...</span>
+               <span className="text-white animate-pulse font-medium">Listening...</span>
              </p>
           ) : assistantIsThinking ? (
             <p className="text-[#8e918f] truncate text-[16px]">
@@ -134,21 +145,25 @@ export function ControlPanel() {
         {/* Right Actions */}
         <div className="flex items-center gap-1">
           {inputText.trim() ? (
-            <button
+            <motion.button
+              whileHover={{ scale: 1.1, backgroundColor: 'rgba(51, 53, 55, 1)' }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleSendText}
-              className="p-3 text-blue-400 hover:bg-[#333537] rounded-full transition-all"
+              className="p-3 text-blue-400 rounded-full transition-all"
             >
               <ArrowUp className="w-6 h-6" />
-            </button>
+            </motion.button>
           ) : (
             <>
-              <button 
+              <motion.button 
+                whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowSettings(!showSettings)}
-                className="hidden md:flex items-center gap-1 px-3 py-1.5 text-[#c4c7c5] hover:text-white hover:bg-[#333537] rounded-full transition-all text-sm font-medium"
+                className="hidden md:flex items-center gap-1 px-3 py-1.5 text-[#c4c7c5] hover:text-white rounded-full transition-colors text-sm font-medium"
               >
                 <span>Pro</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
+                <ChevronDown className={`w-4 h-4 transition-transform ${showSettings ? 'rotate-180' : ''}`} />
+              </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -193,15 +208,17 @@ function VoiceSelector() {
       <label className="text-[11px] font-bold uppercase tracking-wider text-[#8e918f] mb-3 block">Voice Profile</label>
       <div className="space-y-2">
         {voices.map((v) => (
-          <button
+          <motion.button
             key={v.id}
+            whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setSelectedVoice(v.id)}
             className={`w-full text-left px-4 py-2 rounded-xl text-sm transition-all ${
-              selectedVoice === v.id ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-[#e3e3e3] hover:bg-[#333537]'
+              selectedVoice === v.id ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'text-[#e3e3e3] border border-transparent'
             }`}
           >
             {v.name}
-          </button>
+          </motion.button>
         ))}
       </div>
     </div>

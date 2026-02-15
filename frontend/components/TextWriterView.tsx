@@ -105,12 +105,14 @@ export function TextWriterView() {
       {/* Header */}
       <header className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center gap-4">
-          <button 
+          <motion.button 
+            whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+            whileTap={{ scale: 0.9 }}
             onClick={handleClose}
-            className="p-2 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
+            className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />
-          </button>
+          </motion.button>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-gemini-sidebar border border-gemini-border flex items-center justify-center">
               <FileText className="w-4 h-4 text-gemini-blue" />
@@ -118,6 +120,13 @@ export function TextWriterView() {
             <h2 className="text-sm font-medium text-gemini-text">Text writer</h2>
           </div>
         </div>
+        <motion.button 
+          whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+          whileTap={{ scale: 0.9 }}
+          className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
+        >
+          <MoreVertical className="w-6 h-6" />
+        </motion.button>
       </header>
 
       {/* Main Content (Focused) */}
@@ -144,20 +153,24 @@ export function TextWriterView() {
                 </div>
                 
                 <div className="flex items-center justify-center gap-3">
-                  <button
+                  <motion.button
+                    whileHover={{ backgroundColor: '#28292a', scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleCopy}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all shadow-md active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all shadow-md"
                   >
                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
                     <span className="text-sm font-medium uppercase tracking-wider">Copy</span>
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ backgroundColor: '#28292a', scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all shadow-md active:scale-95"
+                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all shadow-md"
                   >
                     <Download className="w-4 h-4" />
                     <span className="text-sm font-medium uppercase tracking-wider">Download</span>
-                  </button>
+                  </motion.button>
                 </div>
               </motion.div>
             ) : (
@@ -203,12 +216,25 @@ export function TextWriterView() {
         </motion.button>
         
         {writerContent && (
-          <button 
-            onClick={handleReset}
-            className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
-          >
-            <RefreshCw className="w-6 h-6" />
-          </button>
+          <div className="flex gap-4">
+            <motion.button 
+              whileHover={{ scale: 1.1, rotate: 180, backgroundColor: '#28292a' }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleReset}
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
+            >
+              <RefreshCw className="w-6 h-6" />
+            </motion.button>
+
+            <motion.button 
+              whileHover={{ scale: 1.1, rotate: 90, backgroundColor: '#28292a' }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleClose}
+              className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
+            >
+              <X className="w-6 h-6" />
+            </motion.button>
+          </div>
         )}
       </div>
     </motion.div>

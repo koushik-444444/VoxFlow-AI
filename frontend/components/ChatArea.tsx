@@ -157,20 +157,24 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
 
         {/* Actions */}
         <div className="flex items-center gap-1 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-          <button
+          <motion.button
+            whileHover={{ backgroundColor: '#333537', scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
             onClick={handleCopy}
-            className="p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] hover:text-white transition-all"
+            className="p-2 rounded-full text-[#c4c7c5] hover:text-white transition-all"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-          </button>
+          </motion.button>
 
           {!isUser && message.audioUrl && (
-            <button
+            <motion.button
+              whileHover={{ backgroundColor: '#333537', scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handlePlay}
-              className="p-2 rounded-full hover:bg-[#333537] text-[#c4c7c5] hover:text-white transition-all"
+              className="p-2 rounded-full text-[#c4c7c5] hover:text-white transition-all"
             >
               {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
+            </motion.button>
           )}
         </div>
       </div>
@@ -181,12 +185,14 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
 function SuggestedPill({ icon, text }: { icon: string, text: string }) {
   const { setService } = useStore()
   return (
-    <button 
+    <motion.button 
+      whileHover={{ backgroundColor: '#333537', scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => text === 'Write anything' && setService('writer')}
-      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#1e1f20] border border-[#444746] hover:bg-[#333537] transition-all text-sm font-medium text-[#e3e3e3]"
+      className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#1e1f20] border border-[#444746] transition-all text-sm font-medium text-[#e3e3e3]"
     >
       <span>{icon}</span>
       <span>{text}</span>
-    </button>
+    </motion.button>
   )
 }
