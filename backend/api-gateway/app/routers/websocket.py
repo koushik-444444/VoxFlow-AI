@@ -117,10 +117,20 @@ async def audio_stream_websocket(
                         if buffer_size > 0:
                             logger.info("Processing end of speech", size=buffer_size)
                             try:
+                                # Auto-detect audio format from buffer header bytes
+                                audio_bytes = bytes(audio_buffer)
+                                if audio_bytes[:4] == b"RIFF" and audio_bytes[8:12] == b"WAVE":
+                                    filename = "speech.wav"
+                                    content_type = "audio/wav"
+                                else:
+                                    filename = "speech.webm"
+                                    content_type = "audio/webm"
+                                logger.info("Detected audio format", format=content_type, size=buffer_size)
+
                                 # Ensure we use the trailing slash for the STT service endpoint
                                 response = await client.post(
                                     f"{stt_service.url}/transcribe/",
-                                    files={"audio": ("speech.webm", bytes(audio_buffer), "audio/webm")},
+                                    files={"audio": (filename, audio_bytes, content_type)},
                                     data={
                                         "session_id": session_id,
                                         "is_partial": False,
