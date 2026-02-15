@@ -41,12 +41,20 @@ export function ControlPanel() {
   })
 
   const handleToggle = () => {
+    // If VAD is active and hands-free, manual toggle is secondary
     const isWsConnected = wsConnection && wsStatus === 'connected'
 
     if (isRecording) {
       stopRecording()
       setIsTranscribing(true)
     } else {
+      // If AI is playing, stop it first
+      const state = useStore.getState()
+      if (state.isPlaying) {
+        state.stopAudio()
+        state.sendInterrupt()
+      }
+
       if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
