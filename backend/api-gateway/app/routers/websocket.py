@@ -266,7 +266,11 @@ async def generate_tts(
     text: str,
     websocket: WebSocket,
 ):
-    """Generate TTS and send to client."""
+    """Generate TTS and send to client.
+
+    Attempts chunked streaming first (binary WebSocket frames for lower TTFB).
+    Falls back to the non-streaming endpoint with base64 JSON if streaming fails.
+    """
     
     tts_service = service_registry.get_healthy_service("tts")
     if not tts_service:
@@ -278,33 +282,84 @@ async def generate_tts(
     
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
-            response = await client.post(
-                f"{tts_service.url}/synthesize/",
+            # Signal the client that TTS audio is about to stream
+            await websocket.send_json({
+                "type": "tts_start",
+                "format": "audio/mpeg",
+            })
+
+            # Use the streaming TTS endpoint for chunked delivery
+            async with client.stream(
+                "POST",
+                f"{tts_service.url}/synthesize/stream",
                 json={
                     "session_id": session_id,
                     "text": text,
                     "voice_id": "default",
                 },
                 timeout=30.0,
-            )
-            
-            if response.status_code == 200:
-                # Encode audio as base64 for WebSocket transmission
-                audio_base64 = base64.b64encode(response.content).decode("utf-8")
-                
-                await websocket.send_json({
-                    "type": "tts_audio",
-                    "audio": audio_base64,
-                    "format": "wav",
-                })
-            else:
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "TTS generation failed",
-                })
+            ) as response:
+                if response.status_code == 200:
+                    async for chunk in response.aiter_bytes(chunk_size=4096):
+                        # Send raw binary audio frames over WebSocket
+                        await websocket.send_bytes(chunk)
+                else:
+                    # Stream endpoint failed — fall back to non-streaming
+                    logger.warning(
+                        "TTS stream endpoint failed, falling back",
+                        status=response.status_code,
+                    )
+                    await _generate_tts_fallback(
+                        tts_service, session_id, text, websocket, client
+                    )
+                    return
+
+            # Signal the client that TTS streaming is complete
+            await websocket.send_json({
+                "type": "tts_end",
+            })
                 
     except Exception as e:
         logger.error("TTS processing error", error=str(e))
+        await websocket.send_json({
+            "type": "error",
+            "message": "TTS processing failed",
+        })
+
+
+async def _generate_tts_fallback(
+    tts_service,
+    session_id: str,
+    text: str,
+    websocket: WebSocket,
+    client: httpx.AsyncClient,
+):
+    """Fallback: fetch full TTS audio and send as base64 JSON."""
+    try:
+        response = await client.post(
+            f"{tts_service.url}/synthesize/",
+            json={
+                "session_id": session_id,
+                "text": text,
+                "voice_id": "default",
+            },
+            timeout=30.0,
+        )
+
+        if response.status_code == 200:
+            audio_base64 = base64.b64encode(response.content).decode("utf-8")
+            await websocket.send_json({
+                "type": "tts_audio",
+                "audio": audio_base64,
+                "format": "wav",
+            })
+        else:
+            await websocket.send_json({
+                "type": "error",
+                "message": "TTS generation failed",
+            })
+    except Exception as e:
+        logger.error("TTS fallback error", error=str(e))
         await websocket.send_json({
             "type": "error",
             "message": "TTS processing failed",

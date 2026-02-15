@@ -2,6 +2,20 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
 
+// Track heartbeat interval outside the store to avoid serialization issues
+let heartbeatInterval: ReturnType<typeof setInterval> | null = null
+
+// Buffer for accumulating binary TTS audio chunks from WebSocket
+let ttsAudioChunks: Uint8Array[] = []
+let ttsIsStreaming = false
+
+function clearHeartbeat() {
+  if (heartbeatInterval !== null) {
+    clearInterval(heartbeatInterval)
+    heartbeatInterval = null
+  }
+}
+
 export interface Message {
   id: string
   role: 'user' | 'assistant' | 'system'
@@ -18,6 +32,25 @@ export interface Conversation {
   createdAt: Date
   updatedAt: Date
 }
+
+// ── WebSocket Protocol Types ──────────────────────────────────────────
+// Incoming messages from the server
+export type WSIncomingMessage =
+  | { type: 'transcription'; text: string; is_partial: boolean }
+  | { type: 'llm_chunk'; content: string; is_final: boolean; full_response?: string }
+  | { type: 'tts_audio'; audio: string; format: string }
+  | { type: 'tts_start'; format: string }
+  | { type: 'tts_end' }
+  | { type: 'error'; message: string }
+  | { type: 'pong' }
+
+// Outgoing messages to the server
+export type WSOutgoingMessage =
+  | { type: 'start_recording' }
+  | { type: 'end_of_speech' }
+  | { type: 'text_message'; text: string }
+  | { type: 'interrupt' }
+  | { type: 'ping' }
 
 interface AppState {
   // Session
@@ -206,13 +239,16 @@ export const useStore = create<AppState>()(
       },
 
       deleteConversation: (id) => {
-        set((state) => ({
-          conversations: state.conversations.filter((c) => c.id !== id),
-          currentConversationId:
-            state.currentConversationId === id
-              ? state.conversations[0]?.id || null
-              : state.currentConversationId,
-        }))
+        set((state) => {
+          const remaining = state.conversations.filter((c) => c.id !== id)
+          return {
+            conversations: remaining,
+            currentConversationId:
+              state.currentConversationId === id
+                ? remaining[0]?.id || null
+                : state.currentConversationId,
+          }
+        })
       },
 
       clearConversations: () => {
@@ -237,6 +273,9 @@ export const useStore = create<AppState>()(
         if (!sessionId) return
         if (wsConnection && wsConnection.readyState === WebSocket.OPEN) return
 
+        // Clear any stale heartbeat from a previous connection
+        clearHeartbeat()
+
         console.log('Connecting to WebSocket:', WS_URL)
         
         try {
@@ -246,20 +285,31 @@ export const useStore = create<AppState>()(
             set({ wsStatus: 'connected' })
             console.log('WebSocket connected')
             
-            // Start heartbeat
-            const interval = setInterval(() => {
+            // Start heartbeat (clear first to prevent duplicates)
+            clearHeartbeat()
+            heartbeatInterval = setInterval(() => {
               if (ws.readyState === WebSocket.OPEN) {
                 ws.send(JSON.stringify({ type: 'ping' }))
               } else {
-                clearInterval(interval)
+                clearHeartbeat()
               }
             }, 30000)
           }
 
           ws.onmessage = (event) => {
+            // Binary frame: raw TTS audio chunk
+            if (event.data instanceof Blob) {
+              event.data.arrayBuffer().then((buf) => {
+                ttsAudioChunks.push(new Uint8Array(buf))
+              })
+              return
+            }
+
             try {
-              const data = JSON.parse(event.data)
-              handleWebSocketMessage(data, get(), set)
+              const data = JSON.parse(event.data) as WSIncomingMessage
+              if (data.type) {
+                handleWebSocketMessage(data, get(), set)
+              }
             } catch (err) {
               console.warn('Received non-JSON message:', event.data)
             }
@@ -267,6 +317,7 @@ export const useStore = create<AppState>()(
 
           ws.onclose = (event) => {
             console.log('WebSocket closed:', event.code, event.reason)
+            clearHeartbeat()
             set({ wsStatus: 'disconnected', wsConnection: null })
             
             // Attempt to reconnect after 3 seconds if not intentionally closed
@@ -294,6 +345,7 @@ export const useStore = create<AppState>()(
 
       disconnectWebSocket: () => {
         const { wsConnection } = get()
+        clearHeartbeat()
         if (wsConnection) {
           wsConnection.close()
           set({ wsConnection: null, wsStatus: 'disconnected' })
@@ -320,8 +372,8 @@ export const useStore = create<AppState>()(
       sendTextMessage: (text: string) => {
         const { wsConnection, wsStatus } = get()
         if (wsConnection && wsStatus === 'connected') {
-          console.log('Sending text message:', text)
-          wsConnection.send(JSON.stringify({ type: 'text_message', text }))
+          const msg: WSOutgoingMessage = { type: 'text_message', text }
+          wsConnection.send(JSON.stringify(msg))
           
           // Add user message to UI immediately
           get().addMessage({
@@ -370,7 +422,7 @@ export const useStore = create<AppState>()(
 )
 
 function handleWebSocketMessage(
-  data: any,
+  data: WSIncomingMessage,
   state: AppState,
   set: (fn: (state: AppState) => Partial<AppState>) => void
 ) {
@@ -396,7 +448,7 @@ function handleWebSocketMessage(
 
     case 'llm_chunk':
       // Handle streaming LLM response
-      if (data.is_final) {
+      if (data.is_final && data.full_response) {
         state.setAssistantIsThinking(false)
         if (state.activeService === 'writer') {
           state.setWriterContent(data.full_response)
@@ -410,7 +462,7 @@ function handleWebSocketMessage(
       break
 
     case 'tts_audio':
-      // Handle TTS audio
+      // Handle TTS audio (base64 fallback path)
       if (data.audio) {
         try {
           const binaryString = atob(data.audio)
@@ -429,6 +481,40 @@ function handleWebSocketMessage(
           }
         } catch (err) {
           console.error('Error playing audio:', err)
+        }
+      }
+      break
+
+    case 'tts_start':
+      // Server is about to stream binary audio frames
+      ttsAudioChunks = []
+      ttsIsStreaming = true
+      break
+
+    case 'tts_end':
+      // Server finished streaming — concatenate chunks and play
+      ttsIsStreaming = false
+      if (ttsAudioChunks.length > 0) {
+        try {
+          const totalLength = ttsAudioChunks.reduce((sum, c) => sum + c.length, 0)
+          const merged = new Uint8Array(totalLength)
+          let offset = 0
+          for (const chunk of ttsAudioChunks) {
+            merged.set(chunk, offset)
+            offset += chunk.length
+          }
+          ttsAudioChunks = []
+          const audioBlob = new Blob([merged], { type: 'audio/mpeg' })
+          const audioUrl = URL.createObjectURL(audioBlob)
+          const audio = new Audio(audioUrl)
+          audio.play().catch(err => console.warn('Audio playback blocked:', err))
+          state.setIsPlaying(true)
+          audio.onended = () => {
+            state.setIsPlaying(false)
+            URL.revokeObjectURL(audioUrl)
+          }
+        } catch (err) {
+          console.error('Error playing streamed audio:', err)
         }
       }
       break

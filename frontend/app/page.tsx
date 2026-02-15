@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, ChevronDown } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
 import { ChatArea } from '@/components/ChatArea'
 import { ControlPanel } from '@/components/ControlPanel'
@@ -12,7 +12,11 @@ import { useStore } from '@/store/useStore'
 import { Toaster } from '@/components/ui/Toaster'
 
 export default function Home() {
-  const { initializeSession, isInitialized, sidebarOpen, toggleSidebar, activeService } = useStore()
+  const initializeSession = useStore((s) => s.initializeSession)
+  const isInitialized = useStore((s) => s.isInitialized)
+  const sidebarOpen = useStore((s) => s.sidebarOpen)
+  const toggleSidebar = useStore((s) => s.toggleSidebar)
+  const activeService = useStore((s) => s.activeService)
 
   useEffect(() => {
     if (!isInitialized) {
@@ -48,6 +52,7 @@ export default function Home() {
                   {!sidebarOpen && (
                     <button 
                       onClick={toggleSidebar}
+                      aria-label="Open sidebar"
                       className="p-3 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
                     >
                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +71,7 @@ export default function Home() {
                     <span className="bg-gemini-gradient bg-clip-text text-transparent">PRO</span>
                   </div>
                   <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold border border-white/20">
-                    K
+                    U
                   </div>
                 </div>
               </motion.header>
@@ -86,49 +91,5 @@ export default function Home() {
 
       <Toaster />
     </div>
-  )
-}
-
-function LatencyIndicator() {
-  const { latency } = useStore()
-
-  const getColor = (ms: number) => {
-    if (ms < 1000) return 'text-green-400'
-    if (ms < 3000) return 'text-yellow-400'
-    return 'text-red-400'
-  }
-
-  return (
-    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700/50">
-      <div className={`w-2 h-2 rounded-full animate-pulse ${getColor(latency)} bg-current`} />
-      <span className="text-xs text-slate-400">Latency:</span>
-      <span className={`text-xs font-mono font-medium ${getColor(latency)}`}>
-        {latency}ms
-      </span>
-    </div>
-  )
-}
-
-function ModelSelector() {
-  const { selectedModel, setSelectedModel } = useStore()
-
-  const models = [
-    { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast & efficient' },
-    { id: 'gpt-4', name: 'GPT-4', description: 'Most capable' },
-    { id: 'claude-instant', name: 'Claude Instant', description: 'Quick responses' },
-  ]
-
-  return (
-    <select
-      value={selectedModel}
-      onChange={(e) => setSelectedModel(e.target.value)}
-      className="px-3 py-1.5 text-sm bg-slate-800/50 border border-slate-700/50 rounded-lg text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-    >
-      {models.map((model) => (
-        <option key={model.id} value={model.id}>
-          {model.name}
-        </option>
-      ))}
-    </select>
   )
 }

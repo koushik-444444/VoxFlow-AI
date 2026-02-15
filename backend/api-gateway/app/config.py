@@ -16,9 +16,9 @@ class Settings(BaseSettings):
     HOST: str = Field(default="0.0.0.0", env="HOST")
     PORT: int = Field(default=8000, env="PORT")
     
-    # CORS
+    # CORS — set CORS_ORIGINS env var to your frontend URL(s), comma-separated
     CORS_ORIGINS: List[str] = Field(
-        default=["*"],
+        default=["http://localhost:3000"],
         env="CORS_ORIGINS"
     )
     
@@ -32,10 +32,21 @@ class Settings(BaseSettings):
     LLM_SERVICE_URL: str = Field(default="http://0.0.0.0:8002", env="LLM_SERVICE_URL")
     TTS_SERVICE_URL: str = Field(default="http://0.0.0.0:8003", env="TTS_SERVICE_URL")
     
-    # Authentication
+    # Authentication — JWT_SECRET must be set in production
     JWT_SECRET: str = Field(default="your-secret-key-change-in-production", env="JWT_SECRET")
     JWT_ALGORITHM: str = Field(default="HS256", env="JWT_ALGORITHM")
     JWT_EXPIRATION_HOURS: int = Field(default=24, env="JWT_EXPIRATION_HOURS")
+
+    def validate_security(self):
+        """Validate that security-critical settings are properly configured in production."""
+        if self.ENVIRONMENT == "production" and self.JWT_SECRET in (
+            "your-secret-key-change-in-production",
+            "your-super-secret-jwt-key-change-in-production",
+        ):
+            raise ValueError(
+                "JWT_SECRET must be changed from the default value in production. "
+                "Set the JWT_SECRET environment variable to a strong random string."
+            )
     
     # Rate Limiting
     RATE_LIMIT_REQUESTS: int = Field(default=100, env="RATE_LIMIT_REQUESTS")

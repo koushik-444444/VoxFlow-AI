@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Epilogue } from 'next/font/google'
 import './globals.css'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 
 const epilogue = Epilogue({ subsets: ['latin'] })
 
@@ -17,7 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${epilogue.className} bg-gemini-bg text-slate-100`}>
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   )

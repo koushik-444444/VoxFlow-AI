@@ -87,8 +87,9 @@ class ErrorHandlingMiddleware(BaseHTTPMiddleware):
             return await call_next(request)
         except Exception as exc:
             logger.exception("Unhandled exception in request")
+            # Never leak internal error details to the client
             return Response(
-                content=f'{{"detail": "{str(exc)}"}}',
+                content='{"detail": "Internal server error"}',
                 status_code=500,
                 media_type="application/json"
             )

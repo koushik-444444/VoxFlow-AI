@@ -4,7 +4,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/store/useStore'
 
 export function WaveformVisualizer() {
-  const { isRecording, audioLevel, isPlaying, assistantIsThinking } = useStore()
+  const isRecording = useStore((s) => s.isRecording)
+  const audioLevel = useStore((s) => s.audioLevel)
+  const isPlaying = useStore((s) => s.isPlaying)
+  const assistantIsThinking = useStore((s) => s.assistantIsThinking)
 
   const isActive = isRecording || isPlaying || assistantIsThinking
 

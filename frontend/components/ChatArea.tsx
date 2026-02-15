@@ -1,13 +1,19 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { User, Bot, Volume2, VolumeX, Copy, Check, FileText } from 'lucide-react'
-import { useStore } from '@/store/useStore'
-import { useState } from 'react'
+import { Volume2, VolumeX, Copy, Check } from 'lucide-react'
+import { useStore, Message } from '@/store/useStore'
+import { useState, useCallback } from 'react'
+import { toast } from '@/components/ui/Toaster'
 
 export function ChatArea() {
-  const { conversations, currentConversationId, isRecording, isTranscribing, assistantIsThinking, setService } = useStore()
+  const conversations = useStore((s) => s.conversations)
+  const currentConversationId = useStore((s) => s.currentConversationId)
+  const isRecording = useStore((s) => s.isRecording)
+  const isTranscribing = useStore((s) => s.isTranscribing)
+  const assistantIsThinking = useStore((s) => s.assistantIsThinking)
+  const setService = useStore((s) => s.setService)
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const currentConversation = conversations.find(
@@ -23,6 +29,9 @@ export function ChatArea() {
   return (
     <div
       ref={scrollRef}
+      role="log"
+      aria-label="Chat messages"
+      aria-live="polite"
       className="flex-1 overflow-y-auto px-4 py-8 md:px-0 scroll-smooth relative z-10 custom-scrollbar"
     >
       <div className="max-w-3xl mx-auto w-full space-y-8">
@@ -35,7 +44,7 @@ export function ChatArea() {
             >
               <div className="w-full max-w-2xl px-6 text-left">
                 <h2 className="text-5xl font-medium tracking-tight mb-8">
-                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hi Koushik</span>
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hello there</span>
                   <br />
                   <span className="text-[#c4c7c5]">Where should we start?</span>
                 </h2>
@@ -66,8 +75,8 @@ export function ChatArea() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-start gap-4 px-6 md:px-0"
             >
-              <div className="w-10 h-10 rounded-full bg-[#1e1f20] flex items-center justify-center flex-shrink-0 text-white font-bold border border-white/10">
-                K
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-rose-500 flex items-center justify-center flex-shrink-0 text-white text-xs font-bold border border-white/10">
+                U
               </div>
               <div className="flex-1 py-2">
                 <p className="text-[#e3e3e3] italic animate-pulse">
@@ -98,29 +107,53 @@ export function ChatArea() {
 }
 
 interface MessageBubbleProps {
-  message: any
+  message: Message
   index: number
 }
 
-function MessageBubble({ message, index }: MessageBubbleProps) {
-  const { isPlaying, setIsPlaying } = useStore()
+const MessageBubble = memo(function MessageBubble({ message, index }: MessageBubbleProps) {
+  const isPlaying = useStore((s) => s.isPlaying)
+  const setIsPlaying = useStore((s) => s.setIsPlaying)
   const [copied, setCopied] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const isUser = message.role === 'user'
   const isStreaming = message.isStreaming
 
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause()
+        audioRef.current = null
+      }
+    }
+  }, [])
+
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(message.content)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    try {
+      await navigator.clipboard.writeText(message.content)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
   }
 
   const handlePlay = () => {
     if (message.audioUrl) {
+      // Stop previous playback if any
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
       const audio = new Audio(message.audioUrl)
+      audioRef.current = audio
       setIsPlaying(true)
-      audio.play()
-      audio.onended = () => setIsPlaying(false)
+      audio.play().catch(() => toast.error('Audio playback failed'))
+      audio.onended = () => {
+        setIsPlaying(false)
+        audioRef.current = null
+      }
     }
   }
 
@@ -140,7 +173,7 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
         }`}
       >
         {isUser ? (
-          'K'
+          'U'
         ) : (
           <div className="w-6 h-6 bg-gemini-gradient rounded-full animate-pulse blur-[1px]" />
         )}
@@ -161,6 +194,7 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
             whileHover={{ backgroundColor: '#333537', scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleCopy}
+            aria-label={copied ? 'Copied' : 'Copy message'}
             className="p-2 rounded-full text-[#c4c7c5] hover:text-white transition-all"
           >
             {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
@@ -171,6 +205,7 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
               whileHover={{ backgroundColor: '#333537', scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={handlePlay}
+              aria-label={isPlaying ? 'Stop audio' : 'Play audio'}
               className="p-2 rounded-full text-[#c4c7c5] hover:text-white transition-all"
             >
               {isPlaying ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
@@ -180,10 +215,10 @@ function MessageBubble({ message, index }: MessageBubbleProps) {
       </div>
     </motion.div>
   )
-}
+})
 
 function SuggestedPill({ icon, text }: { icon: string, text: string }) {
-  const { setService } = useStore()
+  const setService = useStore((s) => s.setService)
   return (
     <motion.button 
       whileHover={{ backgroundColor: '#333537', scale: 1.05 }}

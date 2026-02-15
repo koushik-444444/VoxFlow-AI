@@ -79,7 +79,7 @@ async def transcribe_audio(
         raise
     except Exception as e:
         logger.error("Transcription failed", error=str(e), session_id=session_id)
-        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Transcription failed. Please try again.")
 
 
 @router.post("/file", response_model=TranscriptionResponse)
@@ -111,7 +111,7 @@ async def transcribe_file(
         
     except Exception as e:
         logger.error("File transcription failed", error=str(e))
-        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+        raise HTTPException(status_code=500, detail="Transcription failed. Please try again.")
 
 
 @router.get("/languages")

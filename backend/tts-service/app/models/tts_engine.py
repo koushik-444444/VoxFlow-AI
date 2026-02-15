@@ -1,6 +1,6 @@
 """Edge-TTS engine for text-to-speech."""
 import time
-from typing import Optional, Dict, Any, List
+from typing import AsyncGenerator, Optional, Dict, Any, List
 import structlog
 
 logger = structlog.get_logger()
@@ -78,6 +78,33 @@ class TTSEngine:
         """Get available voices."""
         return self._voices
     
+    async def synthesize_stream(
+        self,
+        text: str,
+        voice_id: Optional[str] = "default",
+        speed: float = 1.0,
+    ) -> AsyncGenerator[bytes, None]:
+        """Stream audio chunks as they arrive from Edge-TTS.
+
+        Yields raw audio bytes suitable for sending as binary WebSocket frames.
+        """
+        import edge_tts
+        from app.config import settings
+
+        if not self.is_initialized:
+            raise RuntimeError("Engine not initialized")
+
+        voice = voice_id if voice_id and voice_id != "default" else settings.EDGE_TTS_VOICE
+
+        speed_pct = int((speed - 1.0) * 100)
+        speed_str = f"{'+' if speed_pct >= 0 else ''}{speed_pct}%"
+
+        communicate = edge_tts.Communicate(text, voice, rate=speed_str)
+
+        async for chunk in communicate.stream():
+            if chunk["type"] == "audio" and chunk["data"]:
+                yield chunk["data"]
+
     def get_info(self) -> Dict[str, Any]:
         """Get engine information."""
         return {

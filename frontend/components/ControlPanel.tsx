@@ -2,22 +2,19 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, MicOff, Square, Settings2, RefreshCw, Plus, ChevronDown, Wrench, ArrowUp } from 'lucide-react'
+import { Mic, Square, RefreshCw, ChevronDown, Wrench, ArrowUp } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function ControlPanel() {
-  const {
-    isRecording,
-    sendAudioChunk,
-    sendInterrupt,
-    wsStatus,
-    initializeSession,
-    setIsTranscribing,
-    wsConnection,
-    assistantIsThinking,
-    sendTextMessage
-  } = useStore()
+  const isRecording = useStore((s) => s.isRecording)
+  const sendAudioChunk = useStore((s) => s.sendAudioChunk)
+  const sendInterrupt = useStore((s) => s.sendInterrupt)
+  const wsStatus = useStore((s) => s.wsStatus)
+  const setIsTranscribing = useStore((s) => s.setIsTranscribing)
+  const wsConnection = useStore((s) => s.wsConnection)
+  const assistantIsThinking = useStore((s) => s.assistantIsThinking)
+  const sendTextMessage = useStore((s) => s.sendTextMessage)
 
   const [showSettings, setShowSettings] = useState(false)
   const [inputText, setInputText] = useState('')
@@ -31,6 +28,12 @@ export function ControlPanel() {
         sendAudioChunk(data)
       }
     },
+    onStop: () => {
+      const { wsConnection: ws, wsStatus: status } = useStore.getState()
+      if (ws && status === 'connected') {
+        ws.send(JSON.stringify({ type: 'end_of_speech' }))
+      }
+    },
     onError: (error) => {
       console.error('Recorder error:', error)
     }
@@ -42,12 +45,6 @@ export function ControlPanel() {
     if (isRecording) {
       stopRecording()
       setIsTranscribing(true)
-      
-      setTimeout(() => {
-        if (isWsConnected) {
-          wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
-        }
-      }, 200)
     } else {
       if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
@@ -88,9 +85,8 @@ export function ControlPanel() {
             exit={{ opacity: 0, y: 10 }}
             className="mb-4 p-6 bg-[#1e1f20] border border-[#444746] rounded-[28px] shadow-2xl"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <VoiceSelector />
-              <SpeedControl />
               <ModelInfo />
             </div>
           </motion.div>
@@ -106,7 +102,7 @@ export function ControlPanel() {
           onClick={handleInterrupt}
           disabled={!isConnected}
           className="p-2.5 text-[#c4c7c5] hover:text-white rounded-full transition-all disabled:opacity-20"
-          title="Reset"
+          aria-label="Reset conversation"
         >
           <RefreshCw className={`w-5 h-5 ${isConnecting ? 'animate-spin' : ''}`} />
         </motion.button>
@@ -149,6 +145,7 @@ export function ControlPanel() {
               whileHover={{ scale: 1.1, backgroundColor: 'rgba(51, 53, 55, 1)' }}
               whileTap={{ scale: 0.9 }}
               onClick={handleSendText}
+              aria-label="Send message"
               className="p-3 text-blue-400 rounded-full transition-all"
             >
               <ArrowUp className="w-6 h-6" />
@@ -170,6 +167,7 @@ export function ControlPanel() {
                 whileTap={{ scale: 0.9 }}
                 onClick={handleToggle}
                 disabled={!isConnected}
+                aria-label={isRecording ? 'Stop recording' : 'Start recording'}
                 className={`p-3 rounded-full transition-all ${
                   isRecording
                     ? 'bg-gemini-gradient text-white shadow-lg'
@@ -197,7 +195,8 @@ export function ControlPanel() {
 }
 
 function VoiceSelector() {
-  const { selectedVoice, setSelectedVoice } = useStore()
+  const selectedVoice = useStore((s) => s.selectedVoice)
+  const setSelectedVoice = useStore((s) => s.setSelectedVoice)
   const voices = [
     { id: 'default', name: 'Default' },
     { id: 'en-US-AndrewNeural', name: 'Andrew' },
@@ -221,20 +220,6 @@ function VoiceSelector() {
           </motion.button>
         ))}
       </div>
-    </div>
-  )
-}
-
-function SpeedControl() {
-  const [speed, setSpeed] = useState(1.0)
-  return (
-    <div>
-      <label className="text-[11px] font-bold uppercase tracking-wider text-[#8e918f] mb-3 block">Speech Speed ({speed}x)</label>
-      <input
-        type="range" min="0.5" max="2.0" step="0.1" value={speed}
-        onChange={(e) => setSpeed(parseFloat(e.target.value))}
-        className="w-full h-1 bg-[#444746] rounded-lg appearance-none cursor-pointer accent-blue-400"
-      />
     </div>
   )
 }

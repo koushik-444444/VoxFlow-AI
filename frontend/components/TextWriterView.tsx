@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   ChevronLeft, 
   Mic, 
+  MoreVertical,
   RefreshCw, 
   X, 
   Copy, 
@@ -14,22 +15,21 @@ import {
 } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useState } from 'react'
+import { toast } from '@/components/ui/Toaster'
 import { WaveformVisualizer } from './WaveformVisualizer'
 import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function TextWriterView() {
-  const { 
-    setService, 
-    writerContent, 
-    setWriterContent,
-    isRecording,
-    isTranscribing,
-    setIsTranscribing,
-    assistantIsThinking,
-    sendAudioChunk,
-    wsStatus,
-    wsConnection,
-  } = useStore()
+  const setService = useStore((s) => s.setService)
+  const writerContent = useStore((s) => s.writerContent)
+  const setWriterContent = useStore((s) => s.setWriterContent)
+  const isRecording = useStore((s) => s.isRecording)
+  const isTranscribing = useStore((s) => s.isTranscribing)
+  const setIsTranscribing = useStore((s) => s.setIsTranscribing)
+  const assistantIsThinking = useStore((s) => s.assistantIsThinking)
+  const sendAudioChunk = useStore((s) => s.sendAudioChunk)
+  const wsStatus = useStore((s) => s.wsStatus)
+  const wsConnection = useStore((s) => s.wsConnection)
 
   const [copied, setCopied] = useState(false)
 
@@ -42,6 +42,12 @@ export function TextWriterView() {
         sendAudioChunk(data)
       }
     },
+    onStop: () => {
+      const { wsConnection: ws, wsStatus: status } = useStore.getState()
+      if (ws && status === 'connected') {
+        ws.send(JSON.stringify({ type: 'end_of_speech' }))
+      }
+    },
     onError: (error) => {
       console.error('Recorder error:', error)
     }
@@ -49,21 +55,15 @@ export function TextWriterView() {
 
   const handleToggleMic = () => {
     if (wsStatus !== 'connected') {
-      alert('Connection lost. Please wait a moment or refresh.')
+      toast.error('Connection lost. Please wait a moment or refresh.')
       return
     }
-
-    const isWsConnected = wsConnection && wsStatus === 'connected'
 
     if (isRecording) {
       stopRecording()
       setIsTranscribing(true)
-      setTimeout(() => {
-        if (isWsConnected) {
-          wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
-        }
-      }, 200)
     } else {
+      const isWsConnected = wsConnection && wsStatus === 'connected'
       if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
@@ -71,20 +71,26 @@ export function TextWriterView() {
     }
   }
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(writerContent)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(writerContent)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
   }
 
   const handleDownload = () => {
-    const element = document.createElement("a")
     const file = new Blob([writerContent], {type: 'text/plain'})
-    element.href = URL.createObjectURL(file)
+    const url = URL.createObjectURL(file)
+    const element = document.createElement("a")
+    element.href = url
     element.download = "voxflow-writing.txt"
     document.body.appendChild(element)
     element.click()
     document.body.removeChild(element)
+    URL.revokeObjectURL(url)
   }
 
   const handleClose = () => {
@@ -109,6 +115,7 @@ export function TextWriterView() {
             whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
             whileTap={{ scale: 0.9 }}
             onClick={handleClose}
+            aria-label="Go back to chat"
             className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
           >
             <ChevronLeft className="w-6 h-6" />
@@ -123,6 +130,7 @@ export function TextWriterView() {
         <motion.button 
           whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
           whileTap={{ scale: 0.9 }}
+          aria-label="More options"
           className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
         >
           <MoreVertical className="w-6 h-6" />
@@ -203,6 +211,7 @@ export function TextWriterView() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={handleToggleMic}
+          aria-label={isRecording ? 'Stop recording' : 'Start recording'}
           className={`relative w-20 h-20 flex items-center justify-center rounded-full transition-all shadow-2xl ${
             isRecording
               ? 'bg-gemini-gradient shadow-gemini-blue/40'
@@ -221,6 +230,7 @@ export function TextWriterView() {
               whileHover={{ scale: 1.1, rotate: 180, backgroundColor: '#28292a' }}
               whileTap={{ scale: 0.9 }}
               onClick={handleReset}
+              aria-label="Reset writer content"
               className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
             >
               <RefreshCw className="w-6 h-6" />
@@ -230,6 +240,7 @@ export function TextWriterView() {
               whileHover={{ scale: 1.1, rotate: 90, backgroundColor: '#28292a' }}
               whileTap={{ scale: 0.9 }}
               onClick={handleClose}
+              aria-label="Close text writer"
               className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
             >
               <X className="w-6 h-6" />

@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse
 import structlog
 
 from app.config import settings
-from app.middleware import LoggingMiddleware, TimingMiddleware, ErrorHandlingMiddleware
+from app.middleware import LoggingMiddleware, TimingMiddleware, ErrorHandlingMiddleware, RateLimitMiddleware
 from app.routers import websocket, chat, health, session, tts
 from app.services.redis_client import redis_client
 from app.services.service_registry import service_registry
@@ -23,6 +23,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator:
     """Application lifespan manager."""
     # Startup
     logger.info("Starting API Gateway", version="1.0.0")
+    
+    # Validate security-critical settings
+    settings.validate_security()
     
     # Initialize Redis connection
     await redis_client.connect()
@@ -65,13 +68,14 @@ app = FastAPI(
 # Add middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
-    expose_headers=["*"],
+    expose_headers=["X-Request-ID", "X-Process-Time", "X-Response-Time", "X-RateLimit-Remaining"],
 )
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(LoggingMiddleware)
 app.add_middleware(TimingMiddleware)
 app.add_middleware(ErrorHandlingMiddleware)
