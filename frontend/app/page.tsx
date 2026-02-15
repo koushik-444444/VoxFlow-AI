@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Zap } from 'lucide-react'
 import { Sidebar } from '@/components/Sidebar'
 import { ChatArea } from '@/components/ChatArea'
 import { ControlPanel } from '@/components/ControlPanel'
@@ -17,6 +17,7 @@ export default function Home() {
   const sidebarOpen = useStore((s) => s.sidebarOpen)
   const toggleSidebar = useStore((s) => s.toggleSidebar)
   const activeService = useStore((s) => s.activeService)
+  const wsStatus = useStore((s) => s.wsStatus)
 
   useEffect(() => {
     if (!isInitialized) {
@@ -25,12 +26,15 @@ export default function Home() {
   }, [initializeSession, isInitialized])
 
   return (
-    <div className="flex h-screen bg-slate-950 overflow-hidden">
-      {/* Sidebar - Always available but can be toggled */}
+    <div className="flex h-screen bg-gemini-bg overflow-hidden relative">
+      {/* Ambient Background */}
+      <div className="ambient-mesh" />
+
+      {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-h-0 relative">
+      <main className="flex-1 flex flex-col min-h-0 relative z-10">
         <AnimatePresence mode="wait">
           {activeService === 'writer' ? (
             <TextWriterView key="writer" />
@@ -46,31 +50,49 @@ export default function Home() {
               <motion.header
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between px-6 py-4 z-10"
+                className="flex items-center justify-between px-6 py-3 z-10 flex-shrink-0"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   {!sidebarOpen && (
                     <button 
                       onClick={toggleSidebar}
                       aria-label="Open sidebar"
-                      className="p-3 rounded-full hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
+                      className="p-2.5 rounded-xl hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6h16M4 12h16M4 18h16" />
                       </svg>
                     </button>
                   )}
-                  <h1 className="text-xl font-medium text-[#e3e3e3] px-2 flex items-center gap-2">
-                    VoxFlow
-                    <ChevronDown className="w-4 h-4 text-gemini-muted" />
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-lg font-semibold tracking-tight text-gemini-text flex items-center gap-1.5">
+                      VoxFlow
+                    </h1>
+                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gemini-hover text-[10px] font-semibold text-gemini-violet uppercase tracking-wider">
+                      AI
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="hidden md:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#444746] text-xs font-bold text-gemini-text cursor-pointer hover:bg-gemini-hover">
-                    <span className="bg-gemini-gradient bg-clip-text text-transparent">PRO</span>
+                <div className="flex items-center gap-2">
+                  {/* Connection Status */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium">
+                    <div className={`w-1.5 h-1.5 rounded-full status-dot ${
+                      wsStatus === 'connected' ? 'bg-emerald-400' :
+                      wsStatus === 'connecting' ? 'bg-amber-400' :
+                      'bg-red-400'
+                    }`} />
+                    <span className="text-gemini-muted hidden sm:inline">
+                      {wsStatus === 'connected' ? 'Live' : wsStatus === 'connecting' ? 'Connecting' : 'Offline'}
+                    </span>
                   </div>
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold border border-white/20">
+
+                  <div className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-lg glass-card text-xs font-bold cursor-pointer hover:bg-gemini-hover transition-all">
+                    <Zap className="w-3 h-3 text-amber-400" />
+                    <span className="bg-gradient-to-r from-gemini-blue via-gemini-purple to-gemini-pink bg-clip-text text-transparent">PRO</span>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gemini-blue via-gemini-violet to-gemini-pink flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-gemini-blue/20">
                     U
                   </div>
                 </div>

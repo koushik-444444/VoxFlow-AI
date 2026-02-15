@@ -11,7 +11,8 @@ import {
   Download, 
   Check,
   FileText,
-  Square
+  Square,
+  Sparkles
 } from 'lucide-react'
 import { useStore } from '@/store/useStore'
 import { useState } from 'react'
@@ -108,38 +109,44 @@ export function TextWriterView() {
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-gemini-bg z-50 flex flex-col"
     >
+      {/* Ambient Background */}
+      <div className="ambient-mesh" />
+
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between px-6 py-3 relative z-10 flex-shrink-0">
+        <div className="flex items-center gap-3">
           <motion.button 
-            whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+            whileHover={{ x: -2 }}
             whileTap={{ scale: 0.9 }}
             onClick={handleClose}
             aria-label="Go back to chat"
-            className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
+            className="p-2 rounded-xl text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className="w-5 h-5" />
           </motion.button>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gemini-sidebar border border-gemini-border flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center">
               <FileText className="w-4 h-4 text-gemini-blue" />
             </div>
-            <h2 className="text-sm font-medium text-gemini-text">Text writer</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-gemini-text">Text Writer</h2>
+              <p className="text-[10px] text-gemini-muted">Voice-to-text mode</p>
+            </div>
           </div>
         </div>
         <motion.button 
-          whileHover={{ backgroundColor: 'rgba(51, 53, 55, 1)' }}
+          whileHover={{ rotate: 90 }}
           whileTap={{ scale: 0.9 }}
           aria-label="More options"
-          className="p-2 rounded-full text-gemini-muted hover:text-white transition-colors"
+          className="p-2 rounded-xl text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all"
         >
-          <MoreVertical className="w-6 h-6" />
+          <MoreVertical className="w-5 h-5" />
         </motion.button>
       </header>
 
-      {/* Main Content (Focused) */}
-      <div className="flex-1 relative flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-10">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
+      {/* Main Content */}
+      <div className="flex-1 relative flex flex-col items-center justify-center max-w-4xl mx-auto w-full px-10 min-h-0">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
           <WaveformVisualizer />
         </div>
 
@@ -149,54 +156,65 @@ export function TextWriterView() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-12"
+                className="space-y-10"
               >
                 <div className="relative group">
                   <h2 className="text-3xl md:text-5xl font-medium text-gemini-text leading-tight px-4">
                     {writerContent}
                     {assistantIsThinking && (
-                      <span className="inline-block w-1 h-8 bg-gemini-blue ml-2 animate-pulse align-middle" />
+                      <span className="inline-block w-0.5 h-8 bg-gemini-blue ml-2 cursor-blink align-middle rounded-full" />
                     )}
                   </h2>
                 </div>
                 
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex items-center justify-center gap-2.5">
                   <motion.button
-                    whileHover={{ backgroundColor: '#28292a', scale: 1.05 }}
+                    whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleCopy}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all shadow-md"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl glass-card hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
                   >
                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                    <span className="text-sm font-medium uppercase tracking-wider">Copy</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider">Copy</span>
                   </motion.button>
                   <motion.button
-                    whileHover={{ backgroundColor: '#28292a', scale: 1.05 }}
+                    whileHover={{ y: -2, scale: 1.02 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleDownload}
-                    className="flex items-center gap-2 px-6 py-3 rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all shadow-md"
+                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl glass-card hover:bg-gemini-hover text-gemini-muted hover:text-white transition-all"
                   >
                     <Download className="w-4 h-4" />
-                    <span className="text-sm font-medium uppercase tracking-wider">Download</span>
+                    <span className="text-xs font-semibold uppercase tracking-wider">Save</span>
                   </motion.button>
                 </div>
               </motion.div>
             ) : (
               <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="space-y-6"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-4"
               >
-                <p className="text-4xl md:text-6xl font-medium text-gemini-muted leading-tight">
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+                  className="mx-auto w-14 h-14 rounded-2xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center mb-6"
+                >
+                  <Sparkles className="w-7 h-7 text-gemini-blue animate-pulse" />
+                </motion.div>
+                <p className="text-3xl md:text-5xl font-semibold tracking-tight">
                   {isRecording ? (
-                    <span className="text-gemini-text">Listening...</span>
+                    <span className="bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink bg-clip-text text-transparent animate-gradient bg-[length:200%_200%]">
+                      Listening...
+                    </span>
                   ) : isTranscribing ? (
                     <span className="text-gemini-blue animate-pulse">Processing...</span>
                   ) : (
-                    <>What's on your mind?</>
+                    <span className="text-gemini-text-secondary">What&apos;s on your mind?</span>
                   )}
                 </p>
-                <p className="text-gemini-muted text-lg">
+                <p className="text-gemini-muted text-base">
                   Tap the mic to start your creative flow
                 </p>
               </motion.div>
@@ -205,45 +223,48 @@ export function TextWriterView() {
         </div>
       </div>
 
-      {/* Simplified Controls */}
-      <div className="pb-16 pt-6 flex justify-center gap-6">
+      {/* Controls */}
+      <div className="pb-12 pt-4 flex justify-center gap-4 relative z-10 flex-shrink-0">
         <motion.button
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.9 }}
           onClick={handleToggleMic}
           aria-label={isRecording ? 'Stop recording' : 'Start recording'}
-          className={`relative w-20 h-20 flex items-center justify-center rounded-full transition-all shadow-2xl ${
+          className={`relative w-16 h-16 flex items-center justify-center rounded-2xl transition-all ${
             isRecording
-              ? 'bg-gemini-gradient shadow-gemini-blue/40'
-              : 'bg-gemini-sidebar border border-gemini-border text-gemini-blue hover:bg-gemini-hover'
+              ? 'bg-gemini-gradient shadow-lg shadow-gemini-blue/30'
+              : 'glass-card text-gemini-blue hover:bg-gemini-hover'
           }`}
         >
-          {isRecording ? <Square className="w-8 h-8 text-white fill-white" /> : <Mic className="w-8 h-8" />}
+          {isRecording ? <Square className="w-6 h-6 text-white fill-white" /> : <Mic className="w-7 h-7" />}
           {isRecording && (
-            <span className="absolute inset-0 rounded-full border-4 border-white/20 animate-ping" />
+            <>
+              <span className="absolute inset-0 rounded-2xl bg-gemini-blue/20 mic-pulse-ring" />
+              <span className="absolute inset-0 rounded-2xl bg-gemini-blue/10 mic-pulse-ring" style={{ animationDelay: '0.5s' }} />
+            </>
           )}
         </motion.button>
         
         {writerContent && (
-          <div className="flex gap-4">
+          <div className="flex gap-2">
             <motion.button 
-              whileHover={{ scale: 1.1, rotate: 180, backgroundColor: '#28292a' }}
+              whileHover={{ scale: 1.05, rotate: 180 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleReset}
               aria-label="Reset writer content"
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
+              className="w-12 h-12 flex items-center justify-center rounded-2xl glass-card text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all self-center"
             >
-              <RefreshCw className="w-6 h-6" />
+              <RefreshCw className="w-5 h-5" />
             </motion.button>
 
             <motion.button 
-              whileHover={{ scale: 1.1, rotate: 90, backgroundColor: '#28292a' }}
+              whileHover={{ scale: 1.05, rotate: 90 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleClose}
               aria-label="Close text writer"
-              className="w-14 h-14 flex items-center justify-center rounded-full bg-gemini-sidebar border border-gemini-border text-gemini-muted hover:text-white transition-all self-center"
+              className="w-12 h-12 flex items-center justify-center rounded-2xl glass-card text-gemini-muted hover:text-white hover:bg-gemini-hover transition-all self-center"
             >
-              <X className="w-6 h-6" />
+              <X className="w-5 h-5" />
             </motion.button>
           </div>
         )}
