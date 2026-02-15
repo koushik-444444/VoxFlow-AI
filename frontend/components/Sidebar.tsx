@@ -82,7 +82,7 @@ export function Sidebar() {
 
           {/* Conversation List */}
           <div className="flex-1 overflow-y-auto px-2 space-y-0.5 custom-scrollbar min-h-0">
-            <p className="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gemini-muted">Recent</p>
+            <h3 className="px-3 py-3 text-lg font-bold tracking-tight text-gemini-text-secondary">Recent</h3>
             {conversations.map((conversation, index) => (
               <motion.button
                 key={conversation.id}
@@ -165,7 +165,7 @@ function SidebarItem({ icon, text }: { icon: React.ReactNode, text: string }) {
       className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-gemini-text-secondary hover:text-gemini-text hover:bg-gemini-hover transition-all"
     >
       <span className="text-gemini-muted">{icon}</span>
-      <span className="text-sm">{text}</span>
+      <h3 className="text-sm font-bold tracking-tight">{text}</h3>
     </motion.button>
   )
 }

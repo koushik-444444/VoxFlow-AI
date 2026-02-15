@@ -129,8 +129,8 @@ export function TextWriterView() {
               <FileText className="w-4 h-4 text-gemini-blue" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-gemini-text">Text Writer</h2>
-              <p className="text-[10px] text-gemini-muted">Voice-to-text mode</p>
+              <h3 className="text-xl font-bold tracking-tight text-gemini-text">Text Writer</h3>
+              <p className="text-[11px] text-gemini-muted italic">*Voice-to-text mode*</p>
             </div>
           </div>
         </div>
@@ -159,12 +159,12 @@ export function TextWriterView() {
                 className="space-y-10"
               >
                 <div className="relative group">
-                  <h2 className="text-3xl md:text-5xl font-medium text-gemini-text leading-tight px-4">
+                  <h3 className="text-3xl md:text-4xl font-bold text-gemini-text leading-tight px-4 tracking-tight">
                     {writerContent}
                     {assistantIsThinking && (
                       <span className="inline-block w-0.5 h-8 bg-gemini-blue ml-2 cursor-blink align-middle rounded-full" />
                     )}
-                  </h2>
+                  </h3>
                 </div>
                 
                 <div className="flex items-center justify-center gap-2.5">
@@ -203,7 +203,7 @@ export function TextWriterView() {
                 >
                   <Sparkles className="w-7 h-7 text-gemini-blue animate-pulse" />
                 </motion.div>
-                <p className="text-3xl md:text-5xl font-semibold tracking-tight">
+                <h3 className="text-3xl md:text-4xl font-bold tracking-tight">
                   {isRecording ? (
                     <span className="bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink bg-clip-text text-transparent animate-gradient bg-[length:200%_200%]">
                       Listening...
@@ -213,9 +213,9 @@ export function TextWriterView() {
                   ) : (
                     <span className="text-gemini-text-secondary">What&apos;s on your mind?</span>
                   )}
-                </p>
-                <p className="text-gemini-muted text-base">
-                  Tap the mic to start your creative flow
+                </h3>
+                <p className="text-gemini-muted text-base italic">
+                  *Tap the mic to start your creative flow*
                 </p>
               </motion.div>
             )}

@@ -65,10 +65,10 @@ export default function Home() {
                     </button>
                   )}
                   <div className="flex items-center gap-2">
-                    <h1 className="text-lg font-semibold tracking-tight text-gemini-text flex items-center gap-1.5">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink animate-gradient bg-[length:200%_200%] drop-shadow-[0_0_15px_rgba(75,144,255,0.3)]">
                       VoxFlow
                     </h1>
-                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-gemini-hover text-[10px] font-semibold text-gemini-violet uppercase tracking-wider">
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gemini-blue/10 text-[12px] font-bold text-gemini-blue border border-gemini-blue/20 uppercase tracking-widest">
                       AI
                     </div>
                   </div>

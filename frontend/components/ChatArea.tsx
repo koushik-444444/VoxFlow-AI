@@ -54,22 +54,20 @@ export function ChatArea() {
                   <Sparkles className="w-8 h-8 text-white" />
                 </motion.div>
 
-                <motion.h2
+                <motion.h3
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2, duration: 0.5 }}
-                  className="text-4xl md:text-5xl font-semibold tracking-tight mb-4"
+                  className="text-2xl md:text-3xl font-bold tracking-tight mb-4 text-gemini-text"
                 >
-                  <span className="bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink bg-clip-text text-transparent animate-gradient bg-[length:200%_200%]">
-                    Good to see you
-                  </span>
-                </motion.h2>
+                  Good to see you
+                </motion.h3>
 
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.35, duration: 0.5 }}
-                  className="text-gemini-muted text-lg mb-12"
+                  className="text-gemini-muted text-lg mb-12 italic"
                 >
                   How can I help you today?
                 </motion.p>
@@ -219,9 +217,9 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
 
       {/* Message Content */}
       <div className="flex-1 min-w-0 py-1">
-        <p className="text-sm font-medium text-gemini-muted mb-1">
+        <h3 className="text-lg font-bold text-gemini-blue mb-1">
           {isUser ? 'You' : 'VoxFlow'}
-        </p>
+        </h3>
         <div className={`rounded-2xl px-4 py-3 ${
           isUser
             ? 'glass-card'

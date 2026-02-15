@@ -122,7 +122,7 @@ export function ControlPanel() {
                   />
                 ))}
               </div>
-              <span className="text-gemini-text text-sm font-medium">Listening...</span>
+              <span className="text-gemini-text text-sm font-medium italic">*Listening...*</span>
             </div>
           ) : assistantIsThinking ? (
             <div className="flex items-center gap-2">
@@ -131,8 +131,8 @@ export function ControlPanel() {
                 animate={{ rotate: 360 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
               />
-              <span className="text-sm font-medium bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink bg-clip-text text-transparent">
-                Thinking...
+              <span className="text-sm font-bold bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink bg-clip-text text-transparent italic">
+                *Thinking...*
               </span>
             </div>
           ) : (
@@ -206,8 +206,8 @@ export function ControlPanel() {
       </div>
 
       {/* Footer */}
-      <p className="mt-3 text-center text-[10px] text-gemini-muted/60">
-        VoxFlow may produce inaccurate information. Verify important facts independently.
+      <p className="mt-3 text-center text-[10px] text-gemini-muted/60 italic">
+        *VoxFlow may produce inaccurate information. Verify important facts independently.*
       </p>
     </div>
   )
@@ -223,7 +223,7 @@ function VoiceSelector() {
   ]
   return (
     <div>
-      <label className="text-[10px] font-semibold uppercase tracking-wider text-gemini-muted mb-3 block">Voice</label>
+      <h3 className="text-lg font-bold tracking-tight text-gemini-text mb-3 block">Voice</h3>
       <div className="space-y-1.5">
         {voices.map((v) => (
           <motion.button
@@ -238,7 +238,7 @@ function VoiceSelector() {
             }`}
           >
             <span className="font-medium">{v.name}</span>
-            <span className="text-[10px] text-gemini-muted">{v.desc}</span>
+            <span className="text-[10px] text-gemini-muted italic">*{v.desc}*</span>
           </motion.button>
         ))}
       </div>
@@ -249,14 +249,14 @@ function VoiceSelector() {
 function ModelInfo() {
   return (
     <div>
-      <label className="text-[10px] font-semibold uppercase tracking-wider text-gemini-muted mb-3 block">Engine</label>
+      <h3 className="text-lg font-bold tracking-tight text-gemini-text mb-3 block">Engine</h3>
       <div className="p-4 rounded-xl glass-card">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-2 h-2 rounded-full bg-emerald-400 status-dot" />
           <p className="text-sm text-gemini-blue font-semibold">Groq LPU</p>
         </div>
-        <p className="text-[11px] text-gemini-muted leading-relaxed">
-          Llama 3.1 + Whisper v3 with real-time inference
+        <p className="text-[11px] text-gemini-muted leading-relaxed italic">
+          *Llama 3.1 + Whisper v3 with real-time inference*
         </p>
       </div>
     </div>
