@@ -21,7 +21,7 @@ export function WaveformVisualizer() {
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="absolute inset-0 flex items-center justify-center pointer-events-none z-0"
         >
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center w-0 h-0">
             {/* Outermost Halo */}
             <motion.div
               className="absolute w-[420px] h-[420px] rounded-full"
@@ -41,7 +41,7 @@ export function WaveformVisualizer() {
 
             {/* Outer Glow Blob */}
             <motion.div 
-              className="voice-blob"
+              className="absolute voice-blob"
               animate={{
                 scale: [1, 1.15 + audioLevel, 1],
                 opacity: [0.4, 0.6, 0.4],
@@ -55,7 +55,7 @@ export function WaveformVisualizer() {
             
             {/* Core Orb */}
             <motion.div 
-              className="voice-blob-inner overflow-hidden flex items-center justify-center p-8"
+              className="absolute voice-blob-inner overflow-hidden flex items-center justify-center p-8"
               animate={{
                 scale: [1, 1.05 + (audioLevel * 0.5), 1],
               }}
