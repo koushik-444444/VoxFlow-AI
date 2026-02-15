@@ -65,11 +65,6 @@ export function WaveformVisualizer() {
                 ease: 'easeInOut'
               }}
             >
-              <img 
-                src="/voxflow-logo.png" 
-                alt="VoxFlow Logo"
-                className="w-full h-full object-contain invert scale-125"
-              />
               {/* Internal shimmer for thinking state */}
               {assistantIsThinking && (
                 <div className="absolute inset-0 rounded-full bg-white/10 animate-ping" />
