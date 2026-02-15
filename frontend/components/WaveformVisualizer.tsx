@@ -71,22 +71,10 @@ export function WaveformVisualizer() {
               )}
             </motion.div>
 
-            {/* Decorative Orbital Rings */}
-            <motion.div
-              className="absolute w-[240px] h-[240px] border border-gemini-blue/8 rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-            />
-            <motion.div
-              className="absolute w-[320px] h-[320px] border border-gemini-violet/5 rounded-full"
-              animate={{ rotate: -360 }}
-              transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-            />
-            <motion.div
-              className="absolute w-[400px] h-[400px] border border-gemini-pink/3 rounded-full"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
-            />
+            {/* Decorative Static Rings */}
+            <div className="absolute w-[240px] h-[240px] border border-gemini-blue/8 rounded-full" />
+            <div className="absolute w-[320px] h-[320px] border border-gemini-violet/5 rounded-full" />
+            <div className="absolute w-[400px] h-[400px] border border-gemini-pink/3 rounded-full" />
           </div>
         </motion.div>
       )}
