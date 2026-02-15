@@ -18,8 +18,7 @@ const nextConfig = {
           },
           {
             key: 'Cross-Origin-Embedder-Policy',
-            // Use 'credentialless' if available, otherwise just ensure wasm works
-            value: 'credentialless', 
+            value: 'require-corp',
           },
         ],
       },
