@@ -5,6 +5,9 @@ import { v4 as uuidv4 } from 'uuid'
 // Track heartbeat interval outside the store to avoid serialization issues
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
 
+// Shared audio element for global playback control
+let globalAudioElement: HTMLAudioElement | null = null
+
 // Buffer for accumulating binary TTS audio chunks from WebSocket
 let ttsAudioChunks: Uint8Array[] = []
 let ttsIsStreaming = false
@@ -13,6 +16,14 @@ function clearHeartbeat() {
   if (heartbeatInterval !== null) {
     clearInterval(heartbeatInterval)
     heartbeatInterval = null
+  }
+}
+
+function stopGlobalAudio() {
+  if (globalAudioElement) {
+    globalAudioElement.pause()
+    globalAudioElement.src = ''
+    globalAudioElement = null
   }
 }
 
@@ -78,6 +89,11 @@ interface AppState {
   setIsPlaying: (value: boolean) => void
   setPlaybackStatus: (status: 'playing' | 'paused' | 'stopped', id?: string | null) => void
   setAudioLevel: (value: number) => void
+  
+  // Audio Control Methods
+  playAudio: (id: string, url: string) => void
+  pauseAudio: () => void
+  stopAudio: () => void
 
   // WebSocket
   wsConnection: WebSocket | null
@@ -275,6 +291,47 @@ export const useStore = create<AppState>()(
         }))
       },
       setAudioLevel: (value) => set({ audioLevel: value }),
+
+      playAudio: (id, url) => {
+        const { playbackStatus, currentlyPlayingId } = get()
+        
+        // If resuming paused audio
+        if (playbackStatus === 'paused' && currentlyPlayingId === id && globalAudioElement) {
+          globalAudioElement.play().catch(err => console.warn('Audio resume failed:', err))
+          set({ playbackStatus: 'playing', isPlaying: true })
+          return
+        }
+
+        // Stop current audio if any
+        stopGlobalAudio()
+
+        // Create and play new audio
+        const audio = new Audio(url)
+        globalAudioElement = audio
+        set({ playbackStatus: 'playing', currentlyPlayingId: id, isPlaying: true })
+
+        audio.play().catch(err => {
+          console.warn('Audio play failed:', err)
+          set({ playbackStatus: 'stopped', currentlyPlayingId: null, isPlaying: false })
+        })
+
+        audio.onended = () => {
+          set({ playbackStatus: 'stopped', currentlyPlayingId: null, isPlaying: false })
+          globalAudioElement = null
+        }
+      },
+
+      pauseAudio: () => {
+        if (globalAudioElement) {
+          globalAudioElement.pause()
+          set({ playbackStatus: 'paused', isPlaying: false })
+        }
+      },
+
+      stopAudio: () => {
+        stopGlobalAudio()
+        set({ playbackStatus: 'stopped', currentlyPlayingId: null, isPlaying: false })
+      },
 
       // WebSocket
       wsConnection: null,
@@ -492,19 +549,12 @@ function handleWebSocketMessage(
             const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
             if (lastAssistantMessage) {
               state.updateMessage(lastAssistantMessage.id, { audioUrl })
-              state.setPlaybackStatus('playing', lastAssistantMessage.id)
+              state.playAudio(lastAssistantMessage.id, audioUrl)
             } else {
-              state.setPlaybackStatus('playing', 'auto-play')
+              state.playAudio('auto-play', audioUrl)
             }
           } else {
-            state.setPlaybackStatus('playing', 'auto-play')
-          }
-
-          const audio = new Audio(audioUrl)
-          audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          audio.onended = () => {
-            state.setPlaybackStatus('stopped', null)
-            URL.revokeObjectURL(audioUrl)
+            state.playAudio('auto-play', audioUrl)
           }
         } catch (err) {
           console.error('Error playing audio:', err)
@@ -541,19 +591,12 @@ function handleWebSocketMessage(
             const lastAssistantMessage = assistantMessages[assistantMessages.length - 1]
             if (lastAssistantMessage) {
               state.updateMessage(lastAssistantMessage.id, { audioUrl })
-              state.setPlaybackStatus('playing', lastAssistantMessage.id)
+              state.playAudio(lastAssistantMessage.id, audioUrl)
             } else {
-              state.setPlaybackStatus('playing', 'auto-play')
+              state.playAudio('auto-play', audioUrl)
             }
           } else {
-            state.setPlaybackStatus('playing', 'auto-play')
-          }
-
-          const audio = new Audio(audioUrl)
-          audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          audio.onended = () => {
-            state.setPlaybackStatus('stopped', null)
-            URL.revokeObjectURL(audioUrl)
+            state.playAudio('auto-play', audioUrl)
           }
         } catch (err) {
           console.error('Error playing streamed audio:', err)

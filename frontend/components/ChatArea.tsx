@@ -153,32 +153,16 @@ interface MessageBubbleProps {
 const MessageBubble = memo(function MessageBubble({ message, index }: MessageBubbleProps) {
   const playbackStatus = useStore((s) => s.playbackStatus)
   const currentlyPlayingId = useStore((s) => s.currentlyPlayingId)
-  const setPlaybackStatus = useStore((s) => s.setPlaybackStatus)
+  const playAudio = useStore((s) => s.playAudio)
+  const pauseAudio = useStore((s) => s.pauseAudio)
+  const stopAudio = useStore((s) => s.stopAudio)
   const [copied, setCopied] = useState(false)
-  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const isUser = message.role === 'user'
   const isStreaming = message.isStreaming
   const isCurrentPlaying = currentlyPlayingId === message.id
   const isPlaying = isCurrentPlaying && playbackStatus === 'playing'
   const isPaused = isCurrentPlaying && playbackStatus === 'paused'
-
-  // Cleanup audio on unmount or when another message starts playing
-  useEffect(() => {
-    if (currentlyPlayingId !== message.id && audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current = null
-    }
-  }, [currentlyPlayingId, message.id])
-
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause()
-        audioRef.current = null
-      }
-    }
-  }, [])
 
   const handleCopy = async () => {
     try {
@@ -192,46 +176,16 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
 
   const handlePlay = () => {
     if (message.audioUrl) {
-      if (isPaused && audioRef.current) {
-        audioRef.current.play()
-        setPlaybackStatus('playing', message.id)
-        return
-      }
-
-      if (audioRef.current) {
-        audioRef.current.pause()
-      }
-
-      const audio = new Audio(message.audioUrl)
-      audioRef.current = audio
-      setPlaybackStatus('playing', message.id)
-      
-      audio.play().catch(() => {
-        toast.error('Audio playback failed')
-        setPlaybackStatus('stopped', null)
-      })
-
-      audio.onended = () => {
-        setPlaybackStatus('stopped', null)
-        audioRef.current = null
-      }
+      playAudio(message.id, message.audioUrl)
     }
   }
 
   const handlePause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      setPlaybackStatus('paused', message.id)
-    }
+    pauseAudio()
   }
 
   const handleStop = () => {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-      setPlaybackStatus('stopped', null)
-      audioRef.current = null
-    }
+    stopAudio()
   }
 
   return (
