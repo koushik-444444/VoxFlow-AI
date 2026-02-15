@@ -1,10 +1,13 @@
 import type { Metadata } from 'next'
-import { Inter, Epilogue } from 'next/font/google'
+import { Outfit } from 'next/font/google'
 import './globals.css'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
-const epilogue = Epilogue({ subsets: ['latin'], variable: '--font-epilogue' })
+const outfit = Outfit({ 
+  subsets: ['latin'], 
+  variable: '--font-outfit',
+  weight: ['300', '400', '500', '600', '700']
+})
 
 export const metadata: Metadata = {
   title: 'VoxFlow - Real-time Voice Conversations',
@@ -14,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.variable} ${epilogue.variable} font-sans bg-gemini-bg text-slate-100 antialiased`}>
+      <body className={`${outfit.variable} font-sans bg-gemini-bg text-slate-100 antialiased`}>
         <ErrorBoundary>
           {children}
         </ErrorBoundary>

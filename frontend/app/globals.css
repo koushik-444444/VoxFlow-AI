@@ -70,7 +70,7 @@
   }
   body {
     @apply bg-gemini-bg text-gemini-text antialiased;
-    font-family: 'Inter', 'Epilogue', system-ui, sans-serif;
+    font-family: var(--font-outfit), system-ui, sans-serif;
   }
 }
 
