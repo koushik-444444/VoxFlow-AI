@@ -55,7 +55,7 @@ export function WaveformVisualizer() {
             
             {/* Core Orb */}
             <motion.div 
-              className="voice-blob-inner"
+              className="voice-blob-inner overflow-hidden flex items-center justify-center"
               animate={{
                 scale: [1, 1.05 + (audioLevel * 0.5), 1],
               }}
@@ -65,6 +65,11 @@ export function WaveformVisualizer() {
                 ease: 'easeInOut'
               }}
             >
+              <img 
+                src="/voxflow-bot.png" 
+                alt="VoxFlow Bot"
+                className="w-full h-full object-cover scale-110"
+              />
               {/* Internal shimmer for thinking state */}
               {assistantIsThinking && (
                 <div className="absolute inset-0 rounded-full bg-white/10 animate-ping" />

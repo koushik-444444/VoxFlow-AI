@@ -49,9 +49,9 @@ export function ChatArea() {
                   initial={{ scale: 0, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.1, duration: 0.5, type: 'spring', stiffness: 200 }}
-                  className="mx-auto mb-8 w-16 h-16 rounded-2xl bg-gradient-to-br from-gemini-blue via-gemini-violet to-gemini-pink flex items-center justify-center shadow-lg shadow-gemini-blue/20 animate-float"
+                  className="mx-auto mb-8 w-20 h-20 rounded-2xl bg-gradient-to-br from-gemini-blue via-gemini-violet to-gemini-pink flex items-center justify-center shadow-lg shadow-gemini-blue/20 animate-float overflow-hidden"
                 >
-                  <Sparkles className="w-8 h-8 text-white" />
+                  <img src="/voxflow-bot.png" alt="VoxFlow Bot" className="w-full h-full object-cover" />
                 </motion.div>
 
                 <motion.h3
@@ -127,8 +127,8 @@ export function ChatArea() {
               animate={{ opacity: 1, x: 0 }}
               className="flex items-start gap-3 px-4 md:px-0"
             >
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center flex-shrink-0">
-                <Sparkles className="w-4 h-4 text-gemini-blue animate-pulse" />
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                <img src="/voxflow-bot.png" alt="VoxFlow Bot" className="w-full h-full object-cover" />
               </div>
               <div className="flex-1 py-2">
                 <div className="flex items-center gap-2">
@@ -196,7 +196,7 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
       className={`flex items-start gap-3 px-4 md:px-0 group ${isUser ? 'flex-row-reverse' : 'flex-row'}`}
     >
       {/* Avatar */}
-      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+      <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden ${
         isUser
           ? 'bg-gradient-to-br from-gemini-blue via-gemini-violet to-gemini-pink text-white text-xs font-bold shadow-md shadow-gemini-blue/20'
           : 'bg-gradient-to-br from-gemini-blue/20 to-gemini-violet/20'
@@ -204,7 +204,7 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
         {isUser ? (
           'U'
         ) : (
-          <Sparkles className="w-4 h-4 text-gemini-blue" />
+          <img src="/voxflow-bot.png" alt="VoxFlow Bot" className="w-full h-full object-cover" />
         )}
       </div>
 
