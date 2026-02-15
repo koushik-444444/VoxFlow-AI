@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Volume2, VolumeX, Copy, Check, Sparkles, ArrowRight } from 'lucide-react'
+import { Volume2, VolumeX, Copy, Check, Sparkles, ArrowRight, Pause, Play, Square } from 'lucide-react'
 import { useStore, Message } from '@/store/useStore'
 import { useState, useCallback } from 'react'
 import { toast } from '@/components/ui/Toaster'
@@ -151,15 +151,26 @@ interface MessageBubbleProps {
 }
 
 const MessageBubble = memo(function MessageBubble({ message, index }: MessageBubbleProps) {
-  const isPlaying = useStore((s) => s.isPlaying)
-  const setIsPlaying = useStore((s) => s.setIsPlaying)
+  const playbackStatus = useStore((s) => s.playbackStatus)
+  const currentlyPlayingId = useStore((s) => s.currentlyPlayingId)
+  const setPlaybackStatus = useStore((s) => s.setPlaybackStatus)
   const [copied, setCopied] = useState(false)
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   const isUser = message.role === 'user'
   const isStreaming = message.isStreaming
+  const isCurrentPlaying = currentlyPlayingId === message.id
+  const isPlaying = isCurrentPlaying && playbackStatus === 'playing'
+  const isPaused = isCurrentPlaying && playbackStatus === 'paused'
 
-  // Cleanup audio on unmount
+  // Cleanup audio on unmount or when another message starts playing
+  useEffect(() => {
+    if (currentlyPlayingId !== message.id && audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current = null
+    }
+  }, [currentlyPlayingId, message.id])
+
   useEffect(() => {
     return () => {
       if (audioRef.current) {
@@ -181,17 +192,45 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
 
   const handlePlay = () => {
     if (message.audioUrl) {
+      if (isPaused && audioRef.current) {
+        audioRef.current.play()
+        setPlaybackStatus('playing', message.id)
+        return
+      }
+
       if (audioRef.current) {
         audioRef.current.pause()
       }
+
       const audio = new Audio(message.audioUrl)
       audioRef.current = audio
-      setIsPlaying(true)
-      audio.play().catch(() => toast.error('Audio playback failed'))
+      setPlaybackStatus('playing', message.id)
+      
+      audio.play().catch(() => {
+        toast.error('Audio playback failed')
+        setPlaybackStatus('stopped', null)
+      })
+
       audio.onended = () => {
-        setIsPlaying(false)
+        setPlaybackStatus('stopped', null)
         audioRef.current = null
       }
+    }
+  }
+
+  const handlePause = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      setPlaybackStatus('paused', message.id)
+    }
+  }
+
+  const handleStop = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setPlaybackStatus('stopped', null)
+      audioRef.current = null
     }
   }
 
@@ -246,15 +285,29 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
           </motion.button>
 
           {!isUser && message.audioUrl && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handlePlay}
-              aria-label={isPlaying ? 'Stop audio' : 'Play audio'}
-              className="p-1.5 rounded-lg text-gemini-muted hover:text-gemini-text hover:bg-gemini-hover transition-all"
-            >
-              {isPlaying ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
-            </motion.button>
+            <div className="flex items-center gap-0.5">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={isPlaying ? handlePause : handlePlay}
+                aria-label={isPlaying ? 'Pause audio' : 'Play audio'}
+                className="p-1.5 rounded-lg text-gemini-muted hover:text-gemini-text hover:bg-gemini-hover transition-all"
+              >
+                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+              </motion.button>
+
+              {(isPlaying || isPaused) && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={handleStop}
+                  aria-label="Stop audio"
+                  className="p-1.5 rounded-lg text-gemini-muted hover:text-gemini-text hover:bg-gemini-hover transition-all"
+                >
+                  <Square className="w-3.5 h-3.5" />
+                </motion.button>
+              )}
+            </div>
           )}
         </div>
       </div>

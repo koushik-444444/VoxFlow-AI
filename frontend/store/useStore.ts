@@ -71,9 +71,12 @@ interface AppState {
   // Audio
   isRecording: boolean
   isPlaying: boolean
+  currentlyPlayingId: string | null
+  playbackStatus: 'playing' | 'paused' | 'stopped'
   audioLevel: number
   setIsRecording: (value: boolean) => void
   setIsPlaying: (value: boolean) => void
+  setPlaybackStatus: (status: 'playing' | 'paused' | 'stopped', id?: string | null) => void
   setAudioLevel: (value: number) => void
 
   // WebSocket
@@ -258,10 +261,19 @@ export const useStore = create<AppState>()(
       // Audio
       isRecording: false,
       isPlaying: false,
+      currentlyPlayingId: null,
+      playbackStatus: 'stopped',
       audioLevel: 0,
 
       setIsRecording: (value) => set({ isRecording: value }),
       setIsPlaying: (value) => set({ isPlaying: value }),
+      setPlaybackStatus: (status, id = null) => {
+        set((state) => ({
+          playbackStatus: status,
+          currentlyPlayingId: id !== undefined ? id : state.currentlyPlayingId,
+          isPlaying: status === 'playing',
+        }))
+      },
       setAudioLevel: (value) => set({ audioLevel: value }),
 
       // WebSocket
@@ -474,9 +486,9 @@ function handleWebSocketMessage(
           const audioUrl = URL.createObjectURL(audioBlob)
           const audio = new Audio(audioUrl)
           audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          state.setIsPlaying(true)
+          state.setPlaybackStatus('playing', 'auto-play')
           audio.onended = () => {
-            state.setIsPlaying(false)
+            state.setPlaybackStatus('stopped', null)
             URL.revokeObjectURL(audioUrl)
           }
         } catch (err) {
@@ -508,9 +520,9 @@ function handleWebSocketMessage(
           const audioUrl = URL.createObjectURL(audioBlob)
           const audio = new Audio(audioUrl)
           audio.play().catch(err => console.warn('Audio playback blocked:', err))
-          state.setIsPlaying(true)
+          state.setPlaybackStatus('playing', 'auto-play')
           audio.onended = () => {
-            state.setIsPlaying(false)
+            state.setPlaybackStatus('stopped', null)
             URL.revokeObjectURL(audioUrl)
           }
         } catch (err) {
