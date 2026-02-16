@@ -182,6 +182,41 @@ export function LandingPage({ onStart }: LandingPageProps) {
         </div>
       </section>
 
+      {/* Privacy Section */}
+      <section className="relative z-10 py-32 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center border-t border-gemini-border/50">
+        <div className="order-2 lg:order-1 p-1 rounded-[40px] bg-gradient-to-br from-gemini-violet/20 to-gemini-blue/20 shadow-2xl overflow-hidden aspect-video">
+           <div className="w-full h-full bg-[#050506] rounded-[39px] flex items-center justify-center p-12">
+              <div className="grid grid-cols-2 gap-4 w-full">
+                 {[1,2,3,4].map(i => (
+                    <div key={i} className="h-20 rounded-2xl bg-gemini-surface/50 border border-gemini-border flex items-center justify-center">
+                       <Shield className="w-8 h-8 text-gemini-blue/40" />
+                    </div>
+                 ))}
+              </div>
+           </div>
+        </div>
+        <div className="space-y-8 order-1 lg:order-2">
+          <h2 className="text-4xl md:text-5xl font-black leading-tight">
+            Security built into <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gemini-violet to-gemini-pink">every wave.</span>
+          </h2>
+          <p className="text-gemini-muted text-lg leading-relaxed">
+            Your conversations are your own. VoxFlow uses state-of-the-art encryption and differential privacy to ensure that your data remains confidential. We never sell your voice data, and our Pro users enjoy advanced identity protection features.
+          </p>
+          <div className="flex gap-4">
+             <div className="flex flex-col gap-1">
+                <span className="text-2xl font-bold">100%</span>
+                <span className="text-[10px] text-gemini-muted uppercase tracking-widest font-black">Encrypted</span>
+             </div>
+             <div className="w-[1px] h-12 bg-gemini-border mx-4" />
+             <div className="flex flex-col gap-1">
+                <span className="text-2xl font-bold">0.0s</span>
+                <span className="text-[10px] text-gemini-muted uppercase tracking-widest font-black">Data Retention</span>
+             </div>
+          </div>
+        </div>
+      </section>
+
       {/* Pricing Section */}
       <section id="pricing" className="relative z-10 py-32 px-6">
         <div className="max-w-7xl mx-auto text-center mb-20">
@@ -430,7 +465,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
       className="p-6 rounded-[24px] bg-gemini-surface/20 border border-gemini-border cursor-pointer transition-all"
       onClick={() => setOpen(!open)}
     >
-      <div className="flex justify-between items-center gap-4">
+      <div className="flex justify-between items-center gap-4 text-left">
         <h3 className="text-lg font-bold">{question}</h3>
         <ChevronDown className={`w-5 h-5 text-gemini-muted transition-transform duration-300 ${open ? 'rotate-180 text-white' : ''}`} />
       </div>
@@ -440,7 +475,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
             initial={{ height: 0, opacity: 0, marginTop: 0 }}
             animate={{ height: 'auto', opacity: 1, marginTop: 16 }}
             exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            className="overflow-hidden"
+            className="overflow-hidden text-left"
           >
             <p className="text-gemini-muted leading-relaxed">{answer}</p>
           </motion.div>
