@@ -155,12 +155,13 @@ export function useVAD() {
       }
     },
     model: 'v5',
-    baseAssetPath: '/',
-    onnxWASMBasePath: '/',
+    // Use CDN for more reliable asset loading in various environments
+    baseAssetPath: 'https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.30/dist/',
+    onnxWASMBasePath: 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.24.1/dist/',
     ortConfig: (ort: any) => {
-      // Use defaults but ensure wasmPaths is a string directory
       ort.env.wasm.numThreads = 1
-      ort.env.wasm.wasmPaths = '/'
+      ort.env.wasm.simd = false
+      ort.env.wasm.proxy = true
     },
     positiveSpeechThreshold: thresholds.positiveSpeechThreshold,
     negativeSpeechThreshold: thresholds.negativeSpeechThreshold,
