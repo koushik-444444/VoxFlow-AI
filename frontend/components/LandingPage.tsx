@@ -51,12 +51,14 @@ export function LandingPage({ onStart }: LandingPageProps) {
           <a href="#faq" className="hover:text-gemini-blue transition-colors">FAQ</a>
         </div>
 
-        <button 
+        <motion.button 
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onStart}
-          className="px-5 py-2 rounded-full bg-white text-black text-sm font-bold hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+          className="px-5 py-2 rounded-full bg-white text-black text-sm font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]"
         >
           Get Started
-        </button>
+        </motion.button>
       </nav>
 
       {/* Partners / Logo Cloud */}
@@ -94,17 +96,23 @@ export function LandingPage({ onStart }: LandingPageProps) {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <button 
+            <motion.button 
+              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(75, 144, 255, 0.4)' }}
+              whileTap={{ scale: 0.95 }}
               onClick={onStart}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gemini-blue text-white font-bold text-lg flex items-center justify-center gap-2 hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(75,144,255,0.4)] transition-all group"
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gemini-blue text-white font-bold text-lg flex items-center justify-center gap-2 transition-colors group"
             >
               Start Speaking Free
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-gemini-border bg-white/5 backdrop-blur-md font-bold text-lg flex items-center justify-center gap-2 hover:bg-white/10 transition-all">
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-gemini-border bg-white/5 backdrop-blur-md font-bold text-lg flex items-center justify-center gap-2 transition-all"
+            >
               <Play className="w-5 h-5 fill-current" />
               Watch Demo
-            </button>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -279,9 +287,13 @@ export function LandingPage({ onStart }: LandingPageProps) {
                   className="w-full pl-12 pr-6 py-4 rounded-2xl bg-black border border-gemini-border focus:border-gemini-blue outline-none transition-all"
                 />
               </div>
-              <button className="px-8 py-4 rounded-2xl bg-white text-black font-black hover:scale-105 transition-all">
+              <motion.button 
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 rounded-2xl bg-white text-black font-black"
+              >
                 Subscribe
-              </button>
+              </motion.button>
             </form>
             
             <p className="text-[10px] text-gemini-muted uppercase tracking-widest pt-8">
@@ -334,7 +346,10 @@ export function LandingPage({ onStart }: LandingPageProps) {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
-    <div className="p-8 rounded-[32px] bg-gemini-surface/30 border border-gemini-border hover:bg-gemini-surface/50 hover:border-gemini-muted/30 transition-all group shadow-xl">
+    <motion.div 
+      whileHover={{ y: -8, backgroundColor: 'rgba(30, 31, 32, 0.5)' }}
+      className="p-8 rounded-[32px] bg-gemini-surface/30 border border-gemini-border transition-all group shadow-xl"
+    >
       <div className="w-12 h-12 rounded-2xl bg-black border border-gemini-border flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
         {icon}
       </div>
@@ -346,7 +361,9 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
 
 function PricingCard({ name, price, features, buttonText, popular, onClick }: any) {
   return (
-    <div className={`p-10 rounded-[40px] flex flex-col relative transition-all border ${
+    <motion.div 
+      whileHover={{ y: popular ? -15 : -10 }}
+      className={`p-10 rounded-[40px] flex flex-col relative transition-all border ${
       popular ? 'bg-gemini-surface border-gemini-blue shadow-[0_0_50px_rgba(75,144,255,0.15)] scale-105 z-10' : 'bg-gemini-surface/30 border-gemini-border hover:bg-gemini-surface/50'
     }`}>
       {popular && (
@@ -369,14 +386,16 @@ function PricingCard({ name, price, features, buttonText, popular, onClick }: an
           </div>
         ))}
       </div>
-      <button 
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         onClick={onClick}
         className={`w-full py-4 rounded-2xl font-black transition-all ${
-          popular ? 'bg-white text-black hover:scale-[1.02]' : 'bg-white/5 border border-gemini-border hover:bg-white/10'
+          popular ? 'bg-white text-black' : 'bg-white/5 border border-gemini-border'
         }`}
       >
         {buttonText}
-      </button>
+      </motion.button>
     </div>
   )
 }
@@ -406,8 +425,9 @@ function TestimonialCard({ text, author, role }: { text: string, author: string,
 function FAQItem({ question, answer }: { question: string, answer: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div 
-      className="p-6 rounded-[24px] bg-gemini-surface/20 border border-gemini-border cursor-pointer transition-all hover:bg-gemini-surface/40"
+    <motion.div 
+      whileHover={{ scale: 1.01, backgroundColor: 'rgba(30, 31, 32, 0.4)' }}
+      className="p-6 rounded-[24px] bg-gemini-surface/20 border border-gemini-border cursor-pointer transition-all"
       onClick={() => setOpen(!open)}
     >
       <div className="flex justify-between items-center gap-4">

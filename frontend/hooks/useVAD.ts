@@ -100,7 +100,7 @@ export function useVAD() {
     startOnLoad: true,
     onSpeechStart: () => {
       const state = useStore.getState()
-      if (!state.isVADEnabled || state.wsStatus !== 'connected') return
+      if (!state.isVADEnabled || state.wsStatus !== 'connected' || state.recordingType === 'manual') return
 
       console.log('[VAD] Speech started')
       triggerHaptic(20)
@@ -118,16 +118,18 @@ export function useVAD() {
       if (state.wsConnection && state.wsStatus === 'connected') {
         state.wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
+      state.setRecordingType('vad')
       state.setIsRecording(true)
     },
     onSpeechEnd: (audio: Float32Array) => {
       const state = useStore.getState()
-      if (!state.isVADEnabled || state.wsStatus !== 'connected') return
+      if (!state.isVADEnabled || state.wsStatus !== 'connected' || state.recordingType !== 'vad') return
 
       console.log('[VAD] Speech ended, encoding', audio.length, 'samples as WAV')
       triggerHaptic([10, 30, 10])
       updateThemeMood('calm')
       state.setIsRecording(false)
+      state.setRecordingType('none')
       state.setIsTranscribing(true)
 
       const wavBuffer = encodeWAV(audio, 16000)

@@ -4,11 +4,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mic, Square, RefreshCw, ChevronDown, Wrench, ArrowUp, Settings2, Ghost } from 'lucide-react'
 import { useStore } from '@/store/useStore'
-import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function ControlPanel() {
   const isRecording = useStore((s) => s.isRecording)
-  const sendAudioChunk = useStore((s) => s.sendAudioChunk)
   const sendInterrupt = useStore((s) => s.sendInterrupt)
   const wsStatus = useStore((s) => s.wsStatus)
   const setIsTranscribing = useStore((s) => s.setIsTranscribing)
@@ -17,35 +15,14 @@ export function ControlPanel() {
   const sendTextMessage = useStore((s) => s.sendTextMessage)
   const showSettings = useStore((s) => s.showSettings)
   const setShowSettings = useStore((s) => s.setShowSettings)
+  const startManualRecording = useStore((s) => s.startManualRecording)
+  const stopManualRecording = useStore((s) => s.stopManualRecording)
 
   const [inputText, setInputText] = useState('')
 
-  const {
-    startRecording,
-    stopRecording,
-  } = useAudioRecorder({
-    onDataAvailable: (data) => {
-      if (data.size > 0) {
-        sendAudioChunk(data)
-      }
-    },
-    onStop: () => {
-      const { wsConnection: ws, wsStatus: status } = useStore.getState()
-      if (ws && status === 'connected') {
-        ws.send(JSON.stringify({ type: 'end_of_speech' }))
-      }
-    },
-    onError: (error) => {
-      console.error('Recorder error:', error)
-    }
-  })
-
-  const handleToggle = () => {
-    // If VAD is active and hands-free, manual toggle is secondary
-    const isWsConnected = wsConnection && wsStatus === 'connected'
-
+  const handleToggle = async () => {
     if (isRecording) {
-      stopRecording()
+      stopManualRecording()
       setIsTranscribing(true)
     } else {
       // If AI is playing, stop it first
@@ -54,11 +31,7 @@ export function ControlPanel() {
         state.stopAudio()
         state.sendInterrupt()
       }
-
-      if (isWsConnected) {
-        wsConnection.send(JSON.stringify({ type: 'start_recording' }))
-      }
-      startRecording()
+      await startManualRecording()
     }
   }
 
@@ -413,4 +386,3 @@ function VADToggle() {
     </div>
   )
 }
-

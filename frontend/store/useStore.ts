@@ -14,6 +14,13 @@ let globalAudioElement: HTMLAudioElement | null = null
 let ttsAudioChunks: Uint8Array[] = []
 let ttsIsStreaming = false
 
+// Manual Recording Resources (Non-serializable)
+let manualStream: MediaStream | null = null
+let manualMediaRecorder: MediaRecorder | null = null
+let manualAudioContext: AudioContext | null = null
+let manualAnalyser: AnalyserNode | null = null
+let manualAnimationFrame: number | null = null
+
 function clearHeartbeat() {
   if (heartbeatInterval !== null) {
     clearInterval(heartbeatInterval)
@@ -83,14 +90,18 @@ interface AppState {
 
   // Audio
   isRecording: boolean
+  recordingType: 'manual' | 'vad' | 'none'
   isPlaying: boolean
   currentlyPlayingId: string | null
   playbackStatus: 'playing' | 'paused' | 'stopped'
   audioLevel: number
+  startManualRecording: () => Promise<void>
+  stopManualRecording: () => void
   setIsRecording: (value: boolean) => void
   setIsPlaying: (value: boolean) => void
   setPlaybackStatus: (status: 'playing' | 'paused' | 'stopped', id?: string | null) => void
   setAudioLevel: (value: number) => void
+  setRecordingType: (type: 'manual' | 'vad' | 'none') => void
   
   // Audio Control Methods
   playAudio: (id: string, url: string) => void
@@ -292,10 +303,105 @@ export const useStore = create<AppState>()(
 
       // Audio
       isRecording: false,
+      recordingType: 'none',
       isPlaying: false,
       currentlyPlayingId: null,
       playbackStatus: 'stopped',
       audioLevel: 0,
+
+      startManualRecording: async () => {
+        const { wsConnection, wsStatus, isRecording } = get()
+        if (isRecording) return
+        if (!wsConnection || wsStatus !== 'connected') {
+          console.warn('Cannot start recording: WebSocket not connected')
+          return
+        }
+
+        try {
+          // Clear any active VAD if it was running (though VAD should be disabled if manual starts)
+          set({ recordingType: 'manual', isRecording: true })
+          
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: {
+              echoCancellation: true,
+              noiseSuppression: true,
+              autoGainControl: true,
+              sampleRate: 16000,
+            },
+          })
+          manualStream = stream
+
+          const audioContext = new AudioContext({ sampleRate: 16000 })
+          manualAudioContext = audioContext
+
+          const analyser = audioContext.createAnalyser()
+          analyser.fftSize = 256
+          manualAnalyser = analyser
+
+          const source = audioContext.createMediaStreamSource(stream)
+          source.connect(analyser)
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount)
+          const monitor = () => {
+            if (!manualAnalyser) return
+            manualAnalyser.getByteFrequencyData(dataArray)
+            const average = dataArray.reduce((a, b) => a + b) / dataArray.length
+            set({ audioLevel: Math.min(average / 128, 1) })
+            manualAnimationFrame = requestAnimationFrame(monitor)
+          }
+          monitor()
+
+          const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+            ? 'audio/webm;codecs=opus'
+            : 'audio/webm'
+          
+          manualMediaRecorder = new MediaRecorder(stream, {
+            mimeType,
+            audioBitsPerSecond: 128000,
+          })
+
+          manualMediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              get().sendAudioChunk(event.data)
+            }
+          }
+
+          manualMediaRecorder.onstart = () => {
+            wsConnection.send(JSON.stringify({ type: 'start_recording' }))
+          }
+
+          manualMediaRecorder.start(100)
+        } catch (err) {
+          console.error('Failed to start manual recording:', err)
+          set({ isRecording: false, recordingType: 'none' })
+        }
+      },
+
+      stopManualRecording: () => {
+        const { wsConnection, wsStatus } = get()
+        
+        if (manualMediaRecorder && manualMediaRecorder.state !== 'inactive') {
+          manualMediaRecorder.stop()
+        }
+        if (manualStream) {
+          manualStream.getTracks().forEach(t => t.stop())
+          manualStream = null
+        }
+        if (manualAudioContext) {
+          manualAudioContext.close()
+          manualAudioContext = null
+        }
+        if (manualAnimationFrame) {
+          cancelAnimationFrame(manualAnimationFrame)
+          manualAnimationFrame = null
+        }
+        
+        if (wsConnection && wsStatus === 'connected') {
+          wsConnection.send(JSON.stringify({ type: 'end_of_speech' }))
+        }
+
+        set({ isRecording: false, recordingType: 'none', audioLevel: 0 })
+      },
 
       setIsRecording: (value) => set({ isRecording: value }),
       setIsPlaying: (value) => set({ isPlaying: value }),
@@ -307,6 +413,7 @@ export const useStore = create<AppState>()(
         }))
       },
       setAudioLevel: (value) => set({ audioLevel: value }),
+      setRecordingType: (type) => set({ recordingType: type }),
 
       playAudio: (id, url) => {
         const { playbackStatus, currentlyPlayingId } = get()

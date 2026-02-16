@@ -18,7 +18,6 @@ import { useStore } from '@/store/useStore'
 import { useState } from 'react'
 import { toast } from '@/components/ui/Toaster'
 import { WaveformVisualizer } from './WaveformVisualizer'
-import { useAudioRecorder } from '@/hooks/useAudioRecorder'
 
 export function TextWriterView() {
   const setService = useStore((s) => s.setService)
@@ -28,47 +27,28 @@ export function TextWriterView() {
   const isTranscribing = useStore((s) => s.isTranscribing)
   const setIsTranscribing = useStore((s) => s.setIsTranscribing)
   const assistantIsThinking = useStore((s) => s.assistantIsThinking)
-  const sendAudioChunk = useStore((s) => s.sendAudioChunk)
   const wsStatus = useStore((s) => s.wsStatus)
   const wsConnection = useStore((s) => s.wsConnection)
+  const startManualRecording = useStore((s) => s.startManualRecording)
+  const stopManualRecording = useStore((s) => s.stopManualRecording)
 
   const [copied, setCopied] = useState(false)
 
-  const {
-    startRecording,
-    stopRecording,
-  } = useAudioRecorder({
-    onDataAvailable: (data) => {
-      if (data.size > 0) {
-        sendAudioChunk(data)
-      }
-    },
-    onStop: () => {
-      const { wsConnection: ws, wsStatus: status } = useStore.getState()
-      if (ws && status === 'connected') {
-        ws.send(JSON.stringify({ type: 'end_of_speech' }))
-      }
-    },
-    onError: (error) => {
-      console.error('Recorder error:', error)
-    }
-  })
-
-  const handleToggleMic = () => {
+  const handleToggleMic = async () => {
     if (wsStatus !== 'connected') {
       toast.error('Connection lost. Please wait a moment or refresh.')
       return
     }
 
     if (isRecording) {
-      stopRecording()
+      stopManualRecording()
       setIsTranscribing(true)
     } else {
       const isWsConnected = wsConnection && wsStatus === 'connected'
       if (isWsConnected) {
         wsConnection.send(JSON.stringify({ type: 'start_recording' }))
       }
-      startRecording()
+      await startManualRecording()
     }
   }
 
