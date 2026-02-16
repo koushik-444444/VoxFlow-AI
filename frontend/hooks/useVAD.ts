@@ -63,10 +63,16 @@ function classifyVADError(error: any): { message: string; action: string } {
       action: 'Please connect a microphone and refresh' 
     }
   }
+  if (errorStr.includes('wasm') && (errorStr.includes('fetch') || errorStr.includes('load') || errorStr.includes('404'))) {
+    return { 
+      message: 'VAD assets failed to load', 
+      action: 'Check your internet connection and refresh' 
+    }
+  }
   if (errorStr.includes('not supported') || errorStr.includes('wasm')) {
     return { 
-      message: 'Browser not supported', 
-      action: 'Try Chrome, Edge, or Firefox' 
+      message: 'Voice Engine not supported', 
+      action: 'Try updating your browser or use Chrome/Edge' 
     }
   }
   if (errorStr.includes('network') || errorStr.includes('fetch')) {
@@ -150,6 +156,8 @@ export function useVAD() {
     baseAssetPath: '/',
     onnxWASMBasePath: '/',
     ortConfig: (ort: any) => {
+      // Use defaults but ensure wasmPaths is a string directory
+      ort.env.wasm.numThreads = 1
       ort.env.wasm.wasmPaths = '/'
     },
     positiveSpeechThreshold: thresholds.positiveSpeechThreshold,
@@ -163,8 +171,11 @@ export function useVAD() {
       setVADStatus('loading')
       setVADError(null)
     } else if (vad.errored) {
+      const errorMsg = String(vad.errored?.message || vad.errored)
+      console.error('[VAD] Raw Hook error:', vad.errored)
+      console.log('[VAD] Error String:', errorMsg)
+      
       const classified = classifyVADError(vad.errored)
-      console.error('[VAD] Hook error:', vad.errored)
       setVADStatus('error')
       setVADError(`${classified.message}: ${classified.action}`)
       if (isVADEnabled) {
