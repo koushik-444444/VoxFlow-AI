@@ -361,3 +361,43 @@
   background-size: 200% 200%;
   animation: gradient-move 6s ease infinite;
 }
+
+/* ── Artist/Editorial Utilities ────────────────────────────────────── */
+.grain-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  pointer-events: none;
+  opacity: 0.04;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+  filter: contrast(150%) brightness(1000%);
+}
+
+.text-editorial {
+  letter-spacing: -0.04em;
+  line-height: 0.85;
+}
+
+.text-mono-technical {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hero-orb {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle at center, #4b90ff 0%, #d0bcff 30%, #ff8fab 60%, transparent 100%);
+  filter: blur(100px);
+  opacity: 0.15;
+  animation: orbit-rotate 30s linear infinite;
+}
+
+@keyframes orbit-rotate {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.2); }
+}
+
+.glass-pill {
+  @apply px-4 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md;
+}

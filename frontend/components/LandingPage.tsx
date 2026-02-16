@@ -26,117 +26,149 @@ interface LandingPageProps {
 
 export function LandingPage({ onStart }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-[#050506] text-white selection:bg-gemini-blue/30 overflow-x-hidden">
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gemini-blue/10 blur-[120px] rounded-full animate-glow-breathe" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-gemini-violet/10 blur-[120px] rounded-full animate-glow-breathe" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-gemini-pink/5 blur-[120px] rounded-full animate-glow-breathe" style={{ animationDelay: '4s' }} />
+    <div className="min-h-screen bg-[#050506] text-white selection:bg-gemini-blue/30 overflow-x-hidden relative">
+      <div className="grain-overlay" />
+      
+      {/* Artistic Ambient Layer */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.1, 1],
+            opacity: [0.15, 0.25, 0.15],
+            x: [0, 50, 0],
+            y: [0, -30, 0]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[-10%] right-[-5%] hero-orb" 
+        />
+        <motion.div 
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.2, 0.1],
+            x: [0, -40, 0],
+            y: [0, 60, 0]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear", delay: 2 }}
+          className="absolute bottom-[-10%] left-[-10%] hero-orb" 
+          style={{ background: 'radial-gradient(circle, #ff8fab 0%, transparent 70%)' }}
+        />
       </div>
 
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center glass-panel border-x-0 border-t-0 bg-black/20 backdrop-blur-2xl">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gemini-gradient p-[1px]">
-            <div className="w-full h-full bg-black rounded-lg flex items-center justify-center">
-              <img src="/voxflow-logo.png" alt="Logo" className="w-5 h-5 invert" />
-            </div>
-          </div>
-          <span className="text-xl font-bold tracking-tighter">VoxFlow</span>
+      <nav className="fixed top-0 w-full z-50 px-10 py-8 flex justify-between items-start mix-blend-difference">
+        <div className="flex flex-col gap-1">
+          <span className="text-2xl font-black tracking-tighter leading-none">VOXFLOW</span>
+          <span className="text-mono-technical text-[8px] opacity-60">Intelligence v1.0 • Stable Release</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gemini-muted hover:text-white transition-colors cursor-pointer">
-          <a href="#features" className="hover:text-gemini-blue transition-colors">Features</a>
-          <a href="#pricing" className="hover:text-gemini-blue transition-colors">Pricing</a>
-          <a href="#faq" className="hover:text-gemini-blue transition-colors">FAQ</a>
-        </div>
+        <div className="flex items-center gap-10">
+          <div className="hidden lg:flex items-center gap-8 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+            <a href="#features" className="hover:text-white transition-colors">Architecture</a>
+            <a href="#pricing" className="hover:text-white transition-colors">Licensing</a>
+            <a href="#faq" className="hover:text-white transition-colors">Resources</a>
+          </div>
 
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={onStart}
-          className="px-5 py-2 rounded-full bg-white text-black text-sm font-bold shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-        >
-          Get Started
-        </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onStart}
+            className="text-[10px] font-black uppercase tracking-[0.2em] px-6 py-3 border border-white/20 rounded-full hover:bg-white hover:text-black transition-all"
+          >
+            Access Terminal
+          </motion.button>
+        </div>
       </nav>
 
-      {/* Partners / Logo Cloud */}
-      <section className="relative z-10 py-10 opacity-30 grayscale hover:grayscale-0 transition-all duration-1000">
-        <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-12 md:gap-24 items-center grayscale invert opacity-50">
-           <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Nvidia_logo.svg" className="h-6 md:h-8" alt="Nvidia" />
-           <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" className="h-6 md:h-8" alt="Google" />
-           <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" className="h-6 md:h-8" alt="Microsoft" />
-           <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" className="h-8 md:h-12" alt="IBM" />
-           <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" className="h-8 md:h-10" alt="Apple" />
+      {/* Hero Section - Artistic Redesign */}
+      <section className="relative z-10 min-h-screen flex flex-col justify-center px-10 lg:px-20 pt-20">
+        <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+          
+          {/* Main Typography Block */}
+          <div className="lg:col-span-8 space-y-12">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="inline-block glass-pill text-mono-technical text-[9px] mb-8">
+                Neural Sound Architecture • Low Latency Mode Active
+              </div>
+              
+              <h1 className="text-[12vw] lg:text-[10vw] font-black text-editorial leading-[0.8] tracking-[-0.06em]">
+                SPEECH<br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-gemini-blue via-gemini-violet to-gemini-pink italic pr-4">UNBOUND</span>
+              </h1>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 1 }}
+              className="max-w-xl"
+            >
+              <p className="text-xl lg:text-2xl text-white/60 leading-relaxed font-light italic">
+                Bridging the gap between biological speech and synthetic intelligence. A high-fidelity conversation experience powered by Groq LPU™ technology.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.8 }}
+              className="flex flex-wrap items-center gap-6"
+            >
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onStart}
+                className="px-12 py-6 rounded-full bg-white text-black font-black text-xs uppercase tracking-[0.3em] shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all"
+              >
+                Initiate Flow
+              </motion.button>
+              
+              <div className="flex items-center gap-4 text-mono-technical text-[9px] opacity-40">
+                <div className="w-10 h-[1px] bg-white/40" />
+                No GPU Required • Open Source Core
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Artistic Sidebar Info */}
+          <div className="hidden lg:flex lg:col-span-4 flex-col items-end gap-20 pb-10">
+            <div className="text-right space-y-4">
+              <span className="text-mono-technical text-[10px] text-gemini-blue block">Latency Control</span>
+              <p className="text-4xl font-black tracking-tighter">&lt;0.5s</p>
+              <p className="text-[10px] opacity-40 leading-relaxed">Near-instant processing for<br />fluid human-like turn taking.</p>
+            </div>
+
+            <div className="text-right space-y-4">
+              <span className="text-mono-technical text-[10px] text-gemini-pink block">Global Reach</span>
+              <p className="text-4xl font-black tracking-tighter">95+</p>
+              <p className="text-[10px] opacity-40 leading-relaxed">Real-time transcription and<br />translation across languages.</p>
+            </div>
+
+            <div className="relative group">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                className="w-32 h-32 rounded-full border border-dashed border-white/20 flex items-center justify-center"
+              >
+                <div className="w-20 h-20 rounded-full bg-gemini-gradient animate-pulse opacity-40 blur-xl" />
+              </motion.div>
+              <div className="absolute inset-0 flex items-center justify-center text-mono-technical text-[8px] font-bold">
+                PROSODY 1.0
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Decorative Floating Text */}
+        <div className="absolute left-[-100px] bottom-[10%] rotate-90 hidden lg:block">
+          <span className="text-mono-technical text-[10px] opacity-20 tracking-[1em] uppercase">Synthetic Intelligence • Sonic Architecture</span>
         </div>
       </section>
 
-      {/* Hero Section */}
-      <section className="relative z-10 pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="space-y-6 max-w-4xl"
-        >
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-gemini-border bg-gemini-surface/50 backdrop-blur-md text-[10px] uppercase tracking-[0.2em] font-black text-gemini-blue drop-shadow-glow">
-            <Zap className="w-3 h-3 fill-current" />
-            Next-Gen Voice Intelligence
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter leading-[0.9] text-white">
-            Conversations that <br />
-            <span className="text-transparent bg-clip-text bg-gemini-gradient animate-gradient bg-[length:200%_200%]">feel human.</span>
-          </h1>
-          
-          <p className="text-lg md:text-xl text-gemini-muted max-w-2xl mx-auto leading-relaxed font-light">
-            VoxFlow breaks the barrier between human speech and machine intelligence. 
-            Experience sub-second latency, natural prosody, and true multimodal understanding.
-          </p>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-8">
-            <motion.button 
-              whileHover={{ scale: 1.05, boxShadow: '0 0 30px rgba(75, 144, 255, 0.4)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={onStart}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-gemini-blue text-white font-bold text-lg flex items-center justify-center gap-2 transition-colors group"
-            >
-              Start Speaking Free
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </motion.button>
-            <motion.button 
-              whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-              whileTap={{ scale: 0.95 }}
-              className="w-full sm:w-auto px-8 py-4 rounded-2xl border border-gemini-border bg-white/5 backdrop-blur-md font-bold text-lg flex items-center justify-center gap-2 transition-all"
-            >
-              <Play className="w-5 h-5 fill-current" />
-              Watch Demo
-            </motion.button>
-          </div>
-        </motion.div>
-
-        {/* Visual Teaser */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 1 }}
-          className="mt-24 w-full max-w-5xl aspect-video rounded-[32px] border border-gemini-border bg-gradient-to-b from-white/5 to-transparent p-1 shadow-2xl relative overflow-hidden group"
-        >
-          <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center backdrop-blur-sm group-hover:backdrop-blur-none transition-all duration-700">
-             <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center border border-white/20 hover:scale-110 transition-all cursor-pointer">
-                <Play className="w-8 h-8 fill-white" />
-             </div>
-          </div>
-          <img 
-            src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop" 
-            alt="Interface Preview" 
-            className="w-full h-full object-cover rounded-[30px]"
-          />
-        </motion.div>
-      </section>
-
-      {/* Features Section */}
+      {/* Partners / Logo Cloud */}
       <section id="features" className="relative z-10 py-32 px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <FeatureCard 
@@ -157,62 +189,77 @@ export function LandingPage({ onStart }: LandingPageProps) {
         </div>
       </section>
 
-      {/* Content Section 1 */}
-      <section className="relative z-10 py-20 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-        <div className="space-y-8 order-2 lg:order-1">
-          <h2 className="text-4xl md:text-5xl font-black leading-tight">
-            Infinite intelligence, <br />
-            <span className="text-gemini-blue">just a word away.</span>
-          </h2>
-          <p className="text-gemini-muted text-lg leading-relaxed">
-            Whether you're brainstorming your next big idea, learning a new language, or just need a friendly voice to talk to, VoxFlow's neural architecture adapts to your needs. Our model doesn't just process text; it understands the nuance of your tone and the intent behind your words.
-          </p>
-          <ul className="space-y-4 pt-4">
-            <ListItem text="Sub-500ms end-to-end latency" />
-            <ListItem text="Emotional intelligence & tone detection" />
-            <ListItem text="Automatic context preservation" />
-          </ul>
-        </div>
-        <div className="order-1 lg:order-2 p-1 rounded-[40px] bg-gradient-to-tr from-gemini-blue/30 to-gemini-pink/30 shadow-2xl overflow-hidden aspect-square">
-           <img 
-              src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop" 
-              className="w-full h-full object-cover rounded-[39px]" 
-              alt="AI Core"
-           />
+      {/* Content Section 1 - Artistic Spread */}
+      <section className="relative z-10 py-40 px-10 lg:px-20 max-w-7xl mx-auto border-t border-white/5">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+          <div className="lg:col-span-6 space-y-12 order-2 lg:order-1">
+            <div className="text-mono-technical text-[9px] text-gemini-blue animate-pulse flex items-center gap-4">
+              <div className="w-2 h-2 rounded-full bg-current" />
+              Real-time Neural Synthesis
+            </div>
+            
+            <h2 className="text-[6vw] lg:text-[4vw] font-black leading-[0.9] tracking-tighter uppercase">
+              Infinite intelligence,<br />
+              <span className="italic text-white/40 pr-4">just a word away.</span>
+            </h2>
+            
+            <p className="text-xl text-white/40 leading-relaxed font-light italic max-w-lg">
+              Our model doesn't just process text; it understands the nuance of your tone and the intent behind your words. A symphony of algorithms working in sub-500ms unison.
+            </p>
+            
+            <ul className="space-y-6 pt-6">
+              <ListItem text="Prosody Detection Engine v3" />
+              <ListItem text="Contextual Memory Buffer (Zero Retention)" />
+              <ListItem text="LPU™ Powered Inference Pipeline" />
+            </ul>
+          </div>
+          
+          <div className="lg:col-span-6 order-1 lg:order-2">
+            <motion.div 
+              whileHover={{ scale: 1.02, rotate: 1 }}
+              className="relative aspect-square grayscale hover:grayscale-0 transition-all duration-1000 rounded-[2px] overflow-hidden group shadow-2xl"
+            >
+              <div className="absolute inset-0 bg-gemini-gradient opacity-10 group-hover:opacity-30 transition-opacity" />
+              <img 
+                src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2574&auto=format&fit=crop" 
+                className="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[2s]" 
+                alt="AI Core"
+              />
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Privacy Section */}
-      <section className="relative z-10 py-32 px-6 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center border-t border-gemini-border/50">
-        <div className="order-2 lg:order-1 p-1 rounded-[40px] bg-gradient-to-br from-gemini-violet/20 to-gemini-blue/20 shadow-2xl overflow-hidden aspect-video">
-           <div className="w-full h-full bg-[#050506] rounded-[39px] flex items-center justify-center p-12">
-              <div className="grid grid-cols-2 gap-4 w-full">
-                 {[1,2,3,4].map(i => (
-                    <div key={i} className="h-20 rounded-2xl bg-gemini-surface/50 border border-gemini-border flex items-center justify-center">
-                       <Shield className="w-8 h-8 text-gemini-blue/40" />
-                    </div>
-                 ))}
+      {/* Privacy Section - Brutalist */}
+      <section className="relative z-10 py-40 px-10 lg:px-20 max-w-7xl mx-auto border-y border-white/5 bg-[#0a0a0b]">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
+          <div className="lg:col-span-5 space-y-10">
+            <h2 className="text-[5vw] lg:text-[3vw] font-black leading-[0.85] tracking-tighter uppercase">
+              Security by<br />
+              <span className="text-gemini-pink italic">Omission.</span>
+            </h2>
+            <p className="text-lg text-white/40 leading-relaxed font-light italic">
+              Your voice is a biological signature. We treat it as such. Zero-persistence by default, encryption by mandate.
+            </p>
+            <div className="flex gap-10">
+              <div className="space-y-2">
+                <span className="text-mono-technical text-[8px] opacity-40">Encryption Type</span>
+                <p className="text-xl font-black">E2E AES-256</p>
               </div>
-           </div>
-        </div>
-        <div className="space-y-8 order-1 lg:order-2">
-          <h2 className="text-4xl md:text-5xl font-black leading-tight">
-            Security built into <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-gemini-violet to-gemini-pink">every wave.</span>
-          </h2>
-          <p className="text-gemini-muted text-lg leading-relaxed">
-            Your conversations are your own. VoxFlow uses state-of-the-art encryption and differential privacy to ensure that your data remains confidential. We never sell your voice data, and our Pro users enjoy advanced identity protection features.
-          </p>
-          <div className="flex gap-4">
-             <div className="flex flex-col gap-1">
-                <span className="text-2xl font-bold">100%</span>
-                <span className="text-[10px] text-gemini-muted uppercase tracking-widest font-black">Encrypted</span>
-             </div>
-             <div className="w-[1px] h-12 bg-gemini-border mx-4" />
-             <div className="flex flex-col gap-1">
-                <span className="text-2xl font-bold">0.0s</span>
-                <span className="text-[10px] text-gemini-muted uppercase tracking-widest font-black">Data Retention</span>
-             </div>
+              <div className="space-y-2">
+                <span className="text-mono-technical text-[8px] opacity-40">Retention Policy</span>
+                <p className="text-xl font-black">0.00 SEC</p>
+              </div>
+            </div>
+          </div>
+          <div className="lg:col-span-7 flex justify-end">
+            <div className="grid grid-cols-2 gap-2 w-full max-w-md grayscale opacity-20 hover:opacity-100 transition-all duration-700">
+               {[1,2,3,4].map(i => (
+                  <div key={i} className="aspect-square border border-white/10 flex items-center justify-center group">
+                     <Shield className="w-12 h-12 text-white/10 group-hover:text-gemini-blue transition-colors" />
+                  </div>
+               ))}
+            </div>
           </div>
         </div>
       </section>
@@ -339,39 +386,34 @@ export function LandingPage({ onStart }: LandingPageProps) {
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gemini-border bg-black/50 backdrop-blur-xl px-6 py-20 mt-20">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start gap-12">
-          <div className="space-y-6 max-w-xs">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gemini-gradient p-[1px]">
-                <div className="w-full h-full bg-black rounded-lg flex items-center justify-center">
-                  <img src="/voxflow-logo.png" alt="Logo" className="w-5 h-5 invert" />
-                </div>
-              </div>
-              <span className="text-xl font-bold tracking-tighter">VoxFlow</span>
+      <footer className="relative z-10 border-t border-white/5 bg-black px-10 py-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20">
+          <div className="lg:col-span-6 space-y-12">
+            <div className="flex flex-col gap-1">
+              <span className="text-3xl font-black tracking-tighter">VOXFLOW</span>
+              <span className="text-mono-technical text-[9px] text-white/40">Architecting the future of human prosody.</span>
             </div>
-            <p className="text-gemini-muted text-sm leading-relaxed">
-              Redefining human-AI interaction through high-fidelity, real-time voice intelligence.
-            </p>
-            <div className="flex items-center gap-4 text-gemini-muted">
-               <Twitter className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-               <Instagram className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
-               <Github className="w-5 h-5 hover:text-white cursor-pointer transition-colors" />
+            
+            <div className="flex items-center gap-8 text-white/40">
+               <Twitter className="w-4 h-4 hover:text-white cursor-pointer transition-colors" />
+               <Instagram className="w-4 h-4 hover:text-white cursor-pointer transition-colors" />
+               <Github className="w-4 h-4 hover:text-white cursor-pointer transition-colors" />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-12 sm:gap-24">
-            <FooterCol title="Product" links={['Features', 'API', 'Pricing', 'Documentation']} />
-            <FooterCol title="Company" links={['About', 'Blog', 'Careers', 'Privacy']} />
-            <FooterCol title="Support" links={['Help Center', 'Status', 'Contact', 'Twitter']} />
+          <div className="lg:col-span-6 grid grid-cols-2 md:grid-cols-3 gap-12">
+            <FooterCol title="Systems" links={['Architecture', 'API', 'Latency', 'LPU™']} />
+            <FooterCol title="Protocol" links={['Security', 'Privacy', 'Compliance', 'Ethics']} />
+            <FooterCol title="Meta" links={['About', 'Careers', 'Documentation', 'Changelog']} />
           </div>
         </div>
-        <div className="max-w-7xl mx-auto pt-20 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] uppercase tracking-widest text-gemini-muted font-bold">
-           <span>© 2026 VoxFlow AI Inc.</span>
-           <div className="flex gap-8">
-              <span className="hover:text-white cursor-pointer">Terms of Service</span>
-              <span className="hover:text-white cursor-pointer">Privacy Policy</span>
-              <span className="hover:text-white cursor-pointer">Cookies</span>
+        
+        <div className="max-w-7xl mx-auto pt-24 flex flex-col md:flex-row justify-between items-center gap-8 text-mono-technical text-[8px] opacity-20">
+           <span>© 2026 VOXFLOW ANALYTICS INC. ALL RIGHTS RESERVED.</span>
+           <div className="flex gap-10">
+              <span className="hover:opacity-100 cursor-pointer transition-opacity">Terms</span>
+              <span className="hover:opacity-100 cursor-pointer transition-opacity">Privacy</span>
+              <span className="hover:opacity-100 cursor-pointer transition-opacity">Contact</span>
            </div>
         </div>
       </footer>
@@ -382,17 +424,70 @@ export function LandingPage({ onStart }: LandingPageProps) {
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) {
   return (
     <motion.div 
-      whileHover={{ y: -8, backgroundColor: 'rgba(30, 31, 32, 0.5)' }}
-      className="p-8 rounded-[32px] bg-gemini-surface/30 border border-gemini-border transition-all group shadow-xl"
+      whileHover={{ y: -8 }}
+      className="p-10 border border-white/5 bg-gradient-to-br from-white/[0.03] to-transparent rounded-[2px] transition-all group relative overflow-hidden"
     >
-      <div className="w-12 h-12 rounded-2xl bg-black border border-gemini-border flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
+      <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-30 transition-opacity">
         {icon}
       </div>
-      <h3 className="text-xl font-bold mb-3">{title}</h3>
-      <p className="text-gemini-muted text-sm leading-relaxed">{description}</p>
+      <div className="space-y-6 relative z-10">
+        <span className="text-mono-technical text-[8px] opacity-40">Module • 001</span>
+        <h3 className="text-2xl font-black tracking-tighter uppercase">{title}</h3>
+        <p className="text-white/40 text-sm leading-relaxed font-light">{description}</p>
+        <div className="pt-4">
+          <div className="w-8 h-[1px] bg-gemini-blue group-hover:w-full transition-all duration-700" />
+        </div>
+      </div>
     </motion.div>
   )
 }
+
+function PricingCard({ name, price, features, buttonText, popular, onClick }: any) {
+  return (
+    <motion.div 
+      whileHover={{ scale: 1.01 }}
+      className={`p-12 border ${
+        popular ? 'border-gemini-blue bg-gemini-blue/[0.03]' : 'border-white/10 bg-white/[0.02]'
+      } rounded-[4px] flex flex-col relative transition-all`}
+    >
+      {popular && (
+        <div className="absolute top-0 right-0 p-4">
+          <div className="text-mono-technical text-[8px] px-3 py-1 bg-gemini-blue text-white rounded-full">
+            Recommended
+          </div>
+        </div>
+      )}
+      <div className="mb-12">
+        <h3 className="text-mono-technical text-[10px] text-white/40 mb-4">{name}</h3>
+        <div className="flex items-baseline gap-2">
+          <span className="text-6xl font-black tracking-tighter">
+            {price === 'Custom' ? '??' : `$${price}`}
+          </span>
+          {price !== 'Custom' && <span className="text-mono-technical text-[10px] opacity-40">/ MO</span>}
+        </div>
+      </div>
+      <div className="flex-1 space-y-6 mb-16 text-sm font-light text-white/60 italic">
+        {features.map((f: string) => (
+          <div key={f} className="flex items-start gap-4 border-b border-white/5 pb-4">
+            <span className="text-mono-technical text-[8px] text-gemini-blue">•</span>
+            <span>{f}</span>
+          </div>
+        ))}
+      </div>
+      <motion.button 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onClick}
+        className={`w-full py-6 rounded-[2px] font-black text-[10px] uppercase tracking-[0.3em] transition-all ${
+          popular ? 'bg-gemini-blue text-white shadow-[0_20px_40px_rgba(75,144,255,0.2)]' : 'border border-white/20 hover:bg-white hover:text-black'
+        }`}
+      >
+        {buttonText}
+      </motion.button>
+    </motion.div>
+  )
+}
+
 
 function PricingCard({ name, price, features, buttonText, popular, onClick }: any) {
   return (
@@ -439,23 +534,18 @@ function PricingCard({ name, price, features, buttonText, popular, onClick }: an
 function TestimonialCard({ text, author, role }: { text: string, author: string, role: string }) {
   return (
     <motion.div 
-      whileHover={{ y: -5, backgroundColor: 'rgba(30, 31, 32, 0.4)' }}
-      className="p-10 rounded-[40px] bg-gemini-surface/20 border border-gemini-border transition-all flex flex-col justify-between group shadow-xl"
+      whileHover={{ y: -10 }}
+      className="p-12 border-l border-white/10 bg-white/[0.01] transition-all flex flex-col justify-between group"
     >
-      <div className="space-y-6">
-        <div className="flex gap-1">
-          {[1,2,3,4,5].map(i => <Zap key={i} className="w-3 h-3 text-gemini-blue fill-current" />)}
-        </div>
-        <p className="text-xl font-medium leading-relaxed italic group-hover:text-white transition-colors">"{text}"</p>
+      <div className="space-y-8">
+        <span className="text-mono-technical text-[8px] text-gemini-blue tracking-[0.5em]">Quote • Verified</span>
+        <p className="text-2xl font-light leading-relaxed italic text-white/60 group-hover:text-white transition-colors duration-700">
+          “{text}”
+        </p>
       </div>
-      <div className="mt-12 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gemini-blue to-gemini-pink flex items-center justify-center text-sm font-black text-white">
-          {author[0]}
-        </div>
-        <div>
-          <p className="font-bold text-sm text-white">{author}</p>
-          <p className="text-xs text-gemini-muted">{role}</p>
-        </div>
+      <div className="mt-16 space-y-2">
+        <p className="font-black text-xs uppercase tracking-widest">{author}</p>
+        <p className="text-mono-technical text-[8px] text-white/40">{role}</p>
       </div>
     </motion.div>
   )
@@ -465,23 +555,31 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
   const [open, setOpen] = useState(false)
   return (
     <motion.div 
-      whileHover={{ scale: 1.01, backgroundColor: 'rgba(30, 31, 32, 0.4)' }}
-      className="p-6 rounded-[24px] bg-gemini-surface/20 border border-gemini-border cursor-pointer transition-all"
-      onClick={() => setOpen(!open)}
+      className="border-b border-white/10 overflow-hidden"
     >
-      <div className="flex justify-between items-center gap-4 text-left">
-        <h3 className="text-lg font-bold">{question}</h3>
-        <ChevronDown className={`w-5 h-5 text-gemini-muted transition-transform duration-300 ${open ? 'rotate-180 text-white' : ''}`} />
-      </div>
+      <button 
+        onClick={() => setOpen(!open)}
+        className="w-full py-10 flex justify-between items-center text-left group"
+      >
+        <h3 className="text-2xl lg:text-3xl font-black tracking-tighter uppercase group-hover:text-gemini-blue transition-colors">{question}</h3>
+        <motion.div
+          animate={{ rotate: open ? 45 : 0 }}
+          className="text-white/20"
+        >
+          <Plus className="w-8 h-8 font-light" />
+        </motion.div>
+      </button>
       <AnimatePresence>
         {open && (
           <motion.div
-            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-            animate={{ height: 'auto', opacity: 1, marginTop: 16 }}
-            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-            className="overflow-hidden text-left"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
-            <p className="text-gemini-muted leading-relaxed">{answer}</p>
+            <p className="pb-10 text-white/40 text-lg leading-relaxed max-w-2xl font-light italic">
+              {answer}
+            </p>
           </motion.div>
         )}
       </AnimatePresence>
