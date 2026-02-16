@@ -58,23 +58,42 @@ export function WaveformVisualizer() {
               }}
             />
             
-            {/* Core 3D Orb */}
+            {/* Core Artistic Orb */}
             <motion.div 
-              className="absolute w-[200px] h-[200px] z-10"
+              className="absolute w-[220px] h-[220px] z-10"
               animate={{
-                scale: [1, 1.05 + (audioLevel * 0.2), 1],
+                scale: isActive ? [1, 1.1 + (audioLevel * 0.4), 1] : 1,
               }}
               transition={{
-                duration: 0.5,
+                duration: 0.8,
                 repeat: Infinity,
-                ease: 'easeInOut'
+                ease: "easeInOut"
               }}
             >
-              <AudioSphere />
-              {/* Internal shimmer for thinking state */}
-              {assistantIsThinking && (
-                <div className="absolute inset-0 rounded-full bg-white/10 animate-ping pointer-events-none" />
-              )}
+              <div className="voice-blob-inner w-full h-full" />
+              
+              {/* Radial Artistic Wave lines */}
+              {isActive && [...Array(12)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  className="absolute top-1/2 left-1/2 w-[1px] bg-gradient-to-t from-gemini-blue to-transparent origin-bottom"
+                  style={{ 
+                    height: 100,
+                    rotate: i * 30,
+                    x: '-50%',
+                    y: '-100%',
+                  }}
+                  animate={{
+                    height: [100, 100 + (audioLevel * 150), 100],
+                    opacity: [0.2, 0.8, 0.2]
+                  }}
+                  transition={{
+                    duration: 0.4,
+                    repeat: Infinity,
+                    delay: i * 0.05
+                  }}
+                />
+              ))}
             </motion.div>
 
             {/* Decorative Static Rings */}

@@ -170,33 +170,33 @@
 
 /* ── AI Voice Blob (Enhanced Multi-Layer) ───────────────────────────── */
 .voice-blob {
-  width: 300px;
-  height: 300px;
+  width: 450px;
+  height: 450px;
   background: conic-gradient(
     from 0deg,
-    rgba(75,144,255,0.4),
-    rgba(167,139,250,0.3),
-    rgba(208,188,255,0.4),
-    rgba(255,143,171,0.3),
-    rgba(75,144,255,0.4)
+    rgba(75, 144, 255, 0.4),
+    rgba(167, 139, 250, 0.3),
+    rgba(208, 188, 255, 0.4),
+    rgba(255, 143, 171, 0.3),
+    rgba(75, 144, 255, 0.4)
   );
   border-radius: 50%;
-  filter: blur(70px);
-  opacity: 0.5;
-  animation: blob-morph 10s ease-in-out infinite alternate;
+  filter: blur(80px);
+  opacity: 0.3;
+  animation: blob-morph 12s ease-in-out infinite alternate;
 }
 
 @keyframes blob-morph {
   0%   { transform: scale(1)    rotate(0deg);   border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
-  25%  { transform: scale(1.08) rotate(90deg);  border-radius: 50% 50% 30% 70% / 50% 60% 40% 60%; }
-  50%  { transform: scale(0.95) rotate(180deg); border-radius: 30% 70% 50% 50% / 60% 40% 60% 40%; }
-  75%  { transform: scale(1.12) rotate(270deg); border-radius: 60% 40% 40% 60% / 40% 60% 50% 50%; }
-  100% { transform: scale(1.02) rotate(360deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
+  25%  { transform: scale(1.15) rotate(90deg);  border-radius: 50% 50% 30% 70% / 50% 60% 40% 60%; }
+  50%  { transform: scale(0.9)  rotate(180deg); border-radius: 30% 70% 50% 50% / 60% 40% 60% 40%; }
+  75%  { transform: scale(1.25) rotate(270deg); border-radius: 60% 40% 40% 60% / 40% 60% 50% 50%; }
+  100% { transform: scale(1.05) rotate(360deg); border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%; }
 }
 
 .voice-blob-inner {
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
   background: conic-gradient(
     from 180deg,
     #4b90ff,
@@ -208,9 +208,44 @@
   border-radius: 50%;
   z-index: 10;
   box-shadow:
-    0 0 60px rgba(75, 144, 255, 0.25),
-    0 0 120px rgba(167, 139, 250, 0.15),
-    inset 0 0 40px rgba(255, 255, 255, 0.05);
+    0 0 80px rgba(75, 144, 255, 0.3),
+    0 0 160px rgba(167, 139, 250, 0.2),
+    inset 0 0 60px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.voice-blob-inner::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.15;
+  filter: contrast(150%) brightness(1000%);
+  mix-blend-mode: overlay;
+}
+
+/* ── Artist Chat Overlays ───────────────────────────────────────────── */
+.message-surface {
+  @apply bg-gemini-sidebar/40 backdrop-blur-3xl border border-white/5;
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5);
+}
+
+.user-message-gradient {
+  background: linear-gradient(135deg, rgba(75, 144, 255, 0.1) 0%, rgba(208, 188, 255, 0.05) 100%);
+}
+
+@keyframes wave-flow {
+  0% { transform: scaleY(0.5); }
+  50% { transform: scaleY(1.5); }
+  100% { transform: scaleY(0.5); }
+}
+
+.wave-line {
+  height: 40px;
+  width: 3px;
+  @apply rounded-full bg-gemini-blue;
+  animation: wave-flow 1.2s ease-in-out infinite;
 }
 
 /* ── Gradient Border Effect ─────────────────────────────────────────── */
