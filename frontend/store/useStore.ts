@@ -121,10 +121,12 @@ interface AppState {
   // UI
   activeService: 'chat' | 'writer'
   sidebarOpen: boolean
+  hasStarted: boolean
   isTranscribing: boolean
   assistantIsThinking: boolean
   writerContent: string
   isVADEnabled: boolean
+  setHasStarted: (value: boolean) => void
   vadStatus: 'loading' | 'active' | 'error' | 'idle'
   vadError: string | null
   vadSensitivity: 'quiet' | 'normal' | 'sensitive'
@@ -492,6 +494,7 @@ export const useStore = create<AppState>()(
       // UI
       activeService: 'chat',
       sidebarOpen: true,
+      hasStarted: false,
       isTranscribing: false,
       assistantIsThinking: false,
       writerContent: '',
@@ -500,6 +503,8 @@ export const useStore = create<AppState>()(
       vadError: null,
       vadSensitivity: 'normal',
       showSettings: false,
+
+      setHasStarted: (value) => set({ hasStarted: value }),
 
       setShowSettings: (value) => set({ showSettings: value }),
       setVADEnabled: (value) => set({ isVADEnabled: value }),
@@ -518,6 +523,7 @@ export const useStore = create<AppState>()(
         conversations: state.conversations,
         selectedModel: state.selectedModel,
         selectedVoice: state.selectedVoice,
+        hasStarted: state.hasStarted,
       }),
     }
   )

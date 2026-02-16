@@ -343,8 +343,15 @@
   animation: status-pulse 2s ease-in-out infinite;
 }
 
-/* ── Smooth Gradient Shift ──────────────────────────────────────────── */
-@keyframes gradient-shift {
+.drop-shadow-glow {
+  filter: drop-shadow(0 0 8px rgba(75, 144, 255, 0.4));
+}
+
+.drop-shadow-purple {
+  filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.4));
+}
+
+@keyframes gradient-move {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
@@ -352,5 +359,5 @@
 
 .animate-gradient {
   background-size: 200% 200%;
-  animation: gradient-shift 6s ease infinite;
+  animation: gradient-move 6s ease infinite;
 }

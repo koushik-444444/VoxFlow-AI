@@ -8,6 +8,7 @@ import { ChatArea } from '@/components/ChatArea'
 import { ControlPanel } from '@/components/ControlPanel'
 import { WaveformVisualizer } from '@/components/WaveformVisualizer'
 import { TextWriterView } from '@/components/TextWriterView'
+import { LandingPage } from '@/components/LandingPage'
 import { useStore } from '@/store/useStore'
 import { Toaster } from '@/components/ui/Toaster'
 
@@ -18,12 +19,18 @@ export default function Home() {
   const toggleSidebar = useStore((s) => s.toggleSidebar)
   const activeService = useStore((s) => s.activeService)
   const wsStatus = useStore((s) => s.wsStatus)
+  const hasStarted = useStore((s) => s.hasStarted)
+  const setHasStarted = useStore((s) => s.setHasStarted)
 
   useEffect(() => {
-    if (!isInitialized) {
+    if (hasStarted && !isInitialized) {
       initializeSession()
     }
-  }, [initializeSession, isInitialized])
+  }, [initializeSession, isInitialized, hasStarted])
+
+  if (!hasStarted) {
+    return <LandingPage onStart={() => setHasStarted(true)} />
+  }
 
   return (
     <div className="flex h-screen bg-gemini-bg overflow-hidden relative">
