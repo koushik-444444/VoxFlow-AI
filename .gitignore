@@ -1,16 +1,11 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+# Python build artifacts
 build/
 develop-eggs/
 dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/  <-- Removed to prevent ignoring frontend/lib
 lib64/
 parts/
 sdist/
