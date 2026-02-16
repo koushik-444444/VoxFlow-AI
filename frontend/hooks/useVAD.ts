@@ -171,7 +171,7 @@ export function useVAD() {
       setVADStatus('loading')
       setVADError(null)
     } else if (vad.errored) {
-      const errorMsg = String(vad.errored?.message || vad.errored)
+      const errorMsg = vad.errored instanceof Error ? vad.errored.message : String(vad.errored)
       console.error('[VAD] Raw Hook error:', vad.errored)
       console.log('[VAD] Error String:', errorMsg)
       

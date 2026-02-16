@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ['@react-three/drei', 'troika-three-text', 'bidi-js', 'webgl-sdf-generator'],
+  transpilePackages: ['@react-three/fiber', 'three'],
   images: {
     domains: ['localhost'],
   },

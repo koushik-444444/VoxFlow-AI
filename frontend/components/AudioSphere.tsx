@@ -1,15 +1,13 @@
 'use client'
 
-import React, { useRef, useMemo } from 'react'
+import React, { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Icosahedron, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 import { useStore } from '@/store/useStore'
 
 function Sphere({ audioLevel }: { audioLevel: number }) {
   const meshRef = useRef<THREE.Mesh>(null!)
-  const materialRef = useRef<any>(null!)
-
+  
   // Smooth the audio level for animation
   const smoothedLevel = useRef(0)
   
@@ -21,30 +19,27 @@ function Sphere({ audioLevel }: { audioLevel: number }) {
       0.1
     )
 
-    // Update distortion and speed based on audio
-    if (materialRef.current) {
-      materialRef.current.distort = 0.4 + smoothedLevel.current * 0.4
-      materialRef.current.speed = 1 + smoothedLevel.current * 3
-    }
+    // Manual mesh distortion effect using scale as a fallback
+    const scale = 1 + smoothedLevel.current * 0.2
+    meshRef.current.scale.set(scale, scale, scale)
 
     // Rotate mesh
-    meshRef.current.rotation.x += delta * 0.1
-    meshRef.current.rotation.y += delta * 0.15
+    meshRef.current.rotation.x += delta * 0.2
+    meshRef.current.rotation.y += delta * 0.3
   })
 
   return (
-    <Icosahedron ref={meshRef} args={[1, 64]}>
-      <MeshDistortMaterial
-        ref={materialRef}
+    <mesh ref={meshRef}>
+      <icosahedronGeometry args={[1, 15]} />
+      <meshStandardMaterial
         color="#4b90ff"
         emissive="#a78bfa"
         emissiveIntensity={0.5}
         roughness={0.2}
         metalness={0.9}
-        distort={0.4}
-        speed={2}
+        wireframe
       />
-    </Icosahedron>
+    </mesh>
   )
 }
 
