@@ -397,7 +397,8 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
 function PricingCard({ name, price, features, buttonText, popular, onClick }: any) {
   return (
     <motion.div 
-      whileHover={{ y: popular ? -15 : -10 }}
+      whileHover={{ y: popular ? -12 : -8, scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
       className={`p-10 rounded-[40px] flex flex-col relative transition-all border ${
       popular ? 'bg-gemini-surface border-gemini-blue shadow-[0_0_50px_rgba(75,144,255,0.15)] scale-105 z-10' : 'bg-gemini-surface/30 border-gemini-border hover:bg-gemini-surface/50'
     }`}>
@@ -437,7 +438,10 @@ function PricingCard({ name, price, features, buttonText, popular, onClick }: an
 
 function TestimonialCard({ text, author, role }: { text: string, author: string, role: string }) {
   return (
-    <div className="p-10 rounded-[40px] bg-gemini-surface/20 border border-gemini-border hover:bg-gemini-surface/40 transition-all flex flex-col justify-between group shadow-xl">
+    <motion.div 
+      whileHover={{ y: -5, backgroundColor: 'rgba(30, 31, 32, 0.4)' }}
+      className="p-10 rounded-[40px] bg-gemini-surface/20 border border-gemini-border transition-all flex flex-col justify-between group shadow-xl"
+    >
       <div className="space-y-6">
         <div className="flex gap-1">
           {[1,2,3,4,5].map(i => <Zap key={i} className="w-3 h-3 text-gemini-blue fill-current" />)}
@@ -445,15 +449,15 @@ function TestimonialCard({ text, author, role }: { text: string, author: string,
         <p className="text-xl font-medium leading-relaxed italic group-hover:text-white transition-colors">"{text}"</p>
       </div>
       <div className="mt-12 flex items-center gap-4">
-        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gemini-blue to-gemini-pink flex items-center justify-center text-sm font-black">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gemini-blue to-gemini-pink flex items-center justify-center text-sm font-black text-white">
           {author[0]}
         </div>
         <div>
-          <p className="font-bold text-sm">{author}</p>
+          <p className="font-bold text-sm text-white">{author}</p>
           <p className="text-xs text-gemini-muted">{role}</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
