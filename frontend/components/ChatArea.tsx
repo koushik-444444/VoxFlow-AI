@@ -40,54 +40,28 @@ export function ChatArea() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="py-16 flex flex-col items-center justify-center min-h-[60vh]"
             >
-              <div className="w-full max-w-2xl px-6 text-center">
-                {/* Animated Logo Orb */}
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.5, type: 'spring', stiffness: 200 }}
-                  className="mx-auto mb-8 w-20 h-20 rounded-2xl bg-gradient-to-br from-gemini-blue via-gemini-violet to-gemini-pink flex items-center justify-center shadow-lg shadow-gemini-blue/20 animate-float overflow-hidden p-3"
-                >
-                  <img src="/voxflow-logo.png" alt="VoxFlow Logo" className="w-full h-full object-contain invert" />
-                </motion.div>
-
-                <motion.h3
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2, duration: 0.5 }}
-                  className="text-2xl md:text-3xl font-bold tracking-tight mb-4 text-gemini-text"
-                >
-                  Good to see you
-                </motion.h3>
-
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.35, duration: 0.5 }}
-                  className="text-gemini-muted text-lg mb-12 italic"
-                >
-                  How can I help you today?
-                </motion.p>
+              <div className="w-full max-w-2xl px-6 text-left">
+                <h2 className="text-5xl md:text-7xl font-medium tracking-tight mb-8 leading-tight">
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-rose-400 bg-clip-text text-transparent">Hi Koushik</span>
+                  <br />
+                  <span className="text-[#c4c7c5]">Where should we start?</span>
+                </h2>
                 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.45, duration: 0.5 }}
-                  className="grid grid-cols-2 md:grid-cols-3 gap-2.5"
-                >
-                  <SuggestedPill icon="create" text="Create image" />
-                  <SuggestedPill icon="explore" text="Explore ideas" />
-                  <SuggestedPill icon="boost" text="Boost my day" />
-                  <SuggestedPill icon="code" text="Write code" />
-                  <SuggestedPill icon="learn" text="Help me learn" />
-                  <SuggestedPill icon="write" text="Write anything" />
-                </motion.div>
+                <div className="flex flex-wrap gap-3 mt-12">
+                  <SuggestedPill icon="🎨" text="Create image" />
+                  <SuggestedPill icon="🏏" text="Explore cricket" />
+                  <SuggestedPill icon="✨" text="Boost my day" />
+                  <SuggestedPill icon="🎬" text="Create video" />
+                  <SuggestedPill icon="🎓" text="Help me learn" />
+                  <SuggestedPill icon="✍️" text="Write anything" />
+                </div>
               </div>
             </motion.div>
           )}
+
 
           {currentConversation?.messages.map((message, index) => (
             <MessageBubble
@@ -271,26 +245,16 @@ const MessageBubble = memo(function MessageBubble({ message, index }: MessageBub
 
 function SuggestedPill({ icon, text }: { icon: string, text: string }) {
   const setService = useStore((s) => s.setService)
-
-  const iconMap: Record<string, string> = {
-    create: '🎨',
-    explore: '🔮',
-    boost: '⚡',
-    code: '💻',
-    learn: '📚',
-    write: '✍️',
-  }
-
+ 
   return (
     <motion.button 
-      whileHover={{ y: -2, scale: 1.02 }}
-      whileTap={{ scale: 0.97 }}
+      whileHover={{ y: -4, scale: 1.05, backgroundColor: '#28292a' }}
+      whileTap={{ scale: 0.95 }}
       onClick={() => text === 'Write anything' && setService('writer')}
-      className="flex items-center gap-2.5 px-4 py-3 rounded-2xl glass-card hover:bg-gemini-hover transition-all text-sm text-gemini-text-secondary hover:text-gemini-text group"
+      className="flex items-center gap-2.5 px-5 py-3.5 rounded-full bg-[#1e1f20] border border-[#444746] hover:border-[#8e918f]/30 transition-all text-sm font-medium text-[#e3e3e3] shadow-lg shadow-black/20"
     >
-      <span className="text-base">{iconMap[icon] || '✨'}</span>
-      <span className="flex-1 text-left">{text}</span>
-      <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-gemini-muted" />
+      <span className="text-lg">{icon}</span>
+      <span>{text}</span>
     </motion.button>
   )
 }
