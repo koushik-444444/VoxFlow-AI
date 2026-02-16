@@ -355,7 +355,7 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode, titl
       </div>
       <h3 className="text-xl font-bold mb-3">{title}</h3>
       <p className="text-gemini-muted text-sm leading-relaxed">{description}</p>
-    </div>
+    </motion.div>
   )
 }
 
@@ -396,7 +396,7 @@ function PricingCard({ name, price, features, buttonText, popular, onClick }: an
       >
         {buttonText}
       </motion.button>
-    </div>
+    </motion.div>
   )
 }
 
@@ -446,7 +446,7 @@ function FAQItem({ question, answer }: { question: string, answer: string }) {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
 
