@@ -198,7 +198,7 @@ async def process_complete_transcription(
     text: str,
     websocket: WebSocket,
 ):
-    """Process complete transcription through LLM and TTS."""
+    """Process complete transcription through LLM and TTS with sentence-level streaming."""
     
     # Add user message to session
     await session_manager.add_message(session_id, "user", text)
@@ -217,6 +217,7 @@ async def process_complete_transcription(
     
     # Stream LLM response
     full_response = ""
+    sentence_buffer = ""
     
     try:
         async with httpx.AsyncClient(follow_redirects=True) as client:
@@ -238,6 +239,7 @@ async def process_complete_transcription(
                         if data.get("chunk"):
                             chunk = data["chunk"]
                             full_response += chunk
+                            sentence_buffer += chunk
                             
                             # Stream to client
                             await websocket.send_json({
@@ -245,11 +247,23 @@ async def process_complete_transcription(
                                 "content": chunk,
                                 "is_final": False,
                             })
+
+                            # Start TTS as soon as we have a full sentence
+                            if any(p in chunk for p in (".", "!", "?", "\n")):
+                                sentence = sentence_buffer.strip()
+                                if len(sentence) > 5: # Minimal length for TTS
+                                    # Launch TTS in background to not block LLM stream
+                                    asyncio.create_task(generate_tts(session_id, sentence, websocket))
+                                    sentence_buffer = ""
                         
                         if data.get("done"):
                             break
         
-        # Send final message
+        # Handle leftovers
+        if sentence_buffer.strip():
+            asyncio.create_task(generate_tts(session_id, sentence_buffer.strip(), websocket))
+
+        # Send final message metadata
         await websocket.send_json({
             "type": "llm_chunk",
             "content": "",
@@ -259,9 +273,6 @@ async def process_complete_transcription(
         
         # Add assistant message to session
         await session_manager.add_message(session_id, "assistant", full_response)
-        
-        # Generate TTS
-        await generate_tts(session_id, full_response, websocket)
         
     except Exception as e:
         logger.error("LLM processing error", error=str(e))

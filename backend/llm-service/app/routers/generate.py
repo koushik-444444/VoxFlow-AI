@@ -81,6 +81,7 @@ async def generate(request: GenerateRequest):
                 
                 async for chunk in llm_engine.generate_stream(
                     messages=request.messages,
+                    session_id=request.session_id,
                     temperature=request.temperature,
                     max_tokens=request.max_tokens,
                 ):
@@ -101,6 +102,7 @@ async def generate(request: GenerateRequest):
             # Return complete response
             result = await llm_engine.generate(
                 messages=request.messages,
+                session_id=request.session_id,
                 temperature=request.temperature,
                 max_tokens=request.max_tokens,
             )

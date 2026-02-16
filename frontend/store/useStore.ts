@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
+import { PerformanceMetrics, perfMonitor } from '@/lib/performance'
+import { updateThemeMood, triggerHaptic } from '@/lib/ux'
 
 // Track heartbeat interval outside the store to avoid serialization issues
 let heartbeatInterval: ReturnType<typeof setInterval> | null = null
@@ -112,7 +114,9 @@ interface AppState {
 
   // Performance
   latency: number
+  performanceMetrics: PerformanceMetrics
   setLatency: (value: number) => void
+  setPerformanceMetrics: (metrics: PerformanceMetrics) => void
 
   // UI
   activeService: 'chat' | 'writer'
@@ -122,10 +126,14 @@ interface AppState {
   writerContent: string
   isVADEnabled: boolean
   vadStatus: 'loading' | 'active' | 'error' | 'idle'
+  vadError: string | null
+  vadSensitivity: 'quiet' | 'normal' | 'sensitive'
   showSettings: boolean
   setShowSettings: (value: boolean) => void
   setVADEnabled: (value: boolean) => void
   setVADStatus: (status: 'loading' | 'active' | 'error' | 'idle') => void
+  setVADError: (error: string | null) => void
+  setVADSensitivity: (sensitivity: 'quiet' | 'normal' | 'sensitive') => void
   setService: (service: 'chat' | 'writer') => void
   setWriterContent: (content: string) => void
   toggleSidebar: () => void
@@ -301,6 +309,13 @@ export const useStore = create<AppState>()(
       playAudio: (id, url) => {
         const { playbackStatus, currentlyPlayingId } = get()
         
+        // Record total response time if this is an auto-play from voice
+        const totalDuration = perfMonitor.end('total_response')
+        if (totalDuration) {
+          perfMonitor.recordMetric('totalResponseTime', totalDuration)
+          set({ performanceMetrics: perfMonitor.getMetrics() })
+        }
+
         // If resuming paused audio
         if (playbackStatus === 'paused' && currentlyPlayingId === id && globalAudioElement) {
           globalAudioElement.play().catch(err => console.warn('Audio resume failed:', err))
@@ -470,7 +485,9 @@ export const useStore = create<AppState>()(
 
       // Performance
       latency: 0,
+      performanceMetrics: perfMonitor.getMetrics(),
       setLatency: (value) => set({ latency: value }),
+      setPerformanceMetrics: (metrics) => set({ performanceMetrics: metrics }),
 
       // UI
       activeService: 'chat',
@@ -480,11 +497,15 @@ export const useStore = create<AppState>()(
       writerContent: '',
       isVADEnabled: true,
       vadStatus: 'idle',
+      vadError: null,
+      vadSensitivity: 'normal',
       showSettings: false,
 
       setShowSettings: (value) => set({ showSettings: value }),
       setVADEnabled: (value) => set({ isVADEnabled: value }),
       setVADStatus: (status) => set({ vadStatus: status }),
+      setVADError: (error) => set({ vadError: error }),
+      setVADSensitivity: (sensitivity) => set({ vadSensitivity: sensitivity }),
       setService: (service) => set({ activeService: service }),
       setWriterContent: (content) => set({ writerContent: content }),
       toggleSidebar: () => set((state) => ({ sidebarOpen: !state.sidebarOpen })),
@@ -515,6 +536,11 @@ function handleWebSocketMessage(
       }
 
       if (!data.is_partial) {
+        const sttDuration = perfMonitor.end('speech_to_text')
+        if (sttDuration) perfMonitor.recordMetric('speechToText', sttDuration)
+        perfMonitor.start('llm_latency')
+        state.setPerformanceMetrics(perfMonitor.getMetrics())
+        
         state.setIsTranscribing(false)
         state.setAssistantIsThinking(true)
         
@@ -529,8 +555,17 @@ function handleWebSocketMessage(
 
     case 'llm_chunk':
       // Handle streaming LLM response
+      if (!state.assistantIsThinking && !data.is_final) {
+        // First token detected
+        const llmDuration = perfMonitor.end('llm_latency')
+        if (llmDuration) perfMonitor.recordMetric('llmLatency', llmDuration)
+        state.setPerformanceMetrics(perfMonitor.getMetrics())
+        updateThemeMood('creative')
+      }
+
       if (data.is_final && data.full_response) {
         state.setAssistantIsThinking(false)
+        updateThemeMood('calm')
         if (state.activeService === 'writer') {
           state.setWriterContent(data.full_response)
         } else {

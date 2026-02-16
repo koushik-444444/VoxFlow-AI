@@ -16,6 +16,8 @@ python-dotenv
 # AI Service Dependencies (Cloud Focused)
 langchain-groq
 edge-tts
+chromadb
+sentence-transformers
 
 # Infrastructure
 supervisor

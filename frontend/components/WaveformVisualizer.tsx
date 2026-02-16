@@ -2,6 +2,11 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useStore } from '@/store/useStore'
+import dynamic from 'next/dynamic'
+
+const AudioSphere = dynamic(() => import('./AudioSphere').then(mod => mod.AudioSphere), {
+  ssr: false,
+})
 
 export function WaveformVisualizer() {
   const isRecording = useStore((s) => s.isRecording)
@@ -53,11 +58,11 @@ export function WaveformVisualizer() {
               }}
             />
             
-            {/* Core Orb */}
+            {/* Core 3D Orb */}
             <motion.div 
-              className="absolute voice-blob-inner overflow-hidden flex items-center justify-center p-8"
+              className="absolute w-[200px] h-[200px] z-10"
               animate={{
-                scale: [1, 1.05 + (audioLevel * 0.5), 1],
+                scale: [1, 1.05 + (audioLevel * 0.2), 1],
               }}
               transition={{
                 duration: 0.5,
@@ -65,9 +70,10 @@ export function WaveformVisualizer() {
                 ease: 'easeInOut'
               }}
             >
+              <AudioSphere />
               {/* Internal shimmer for thinking state */}
               {assistantIsThinking && (
-                <div className="absolute inset-0 rounded-full bg-white/10 animate-ping" />
+                <div className="absolute inset-0 rounded-full bg-white/10 animate-ping pointer-events-none" />
               )}
             </motion.div>
 

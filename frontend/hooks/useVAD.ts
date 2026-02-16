@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useMicVAD } from '@ricky0123/vad-react'
 import { useStore } from '@/store/useStore'
 import { toast } from '@/components/ui/Toaster'
+import { perfMonitor } from '@/lib/performance'
+import { triggerHaptic, updateThemeMood } from '@/lib/ux'
 
 function writeString(view: DataView, offset: number, str: string) {
   for (let i = 0; i < str.length; i++) {
@@ -18,13 +20,13 @@ function encodeWAV(samples: Float32Array, sampleRate = 16000): ArrayBuffer {
   view.setUint32(4, 36 + numSamples * 2, true)
   writeString(view, 8, 'WAVE')
   writeString(view, 12, 'fmt ')
-  view.setUint32(16, 16, true)       // chunk size
-  view.setUint16(20, 1, true)        // PCM format
-  view.setUint16(22, 1, true)        // mono
+  view.setUint32(16, 16, true)
+  view.setUint16(20, 1, true)
+  view.setUint16(22, 1, true)
   view.setUint32(24, sampleRate, true)
-  view.setUint32(28, sampleRate * 2, true) // byte rate
-  view.setUint16(32, 2, true)        // block align
-  view.setUint16(34, 16, true)       // bits per sample
+  view.setUint32(28, sampleRate * 2, true)
+  view.setUint16(32, 2, true)
+  view.setUint16(34, 16, true)
   writeString(view, 36, 'data')
   view.setUint32(40, numSamples * 2, true)
 
@@ -35,10 +37,58 @@ function encodeWAV(samples: Float32Array, sampleRate = 16000): ArrayBuffer {
   return buffer
 }
 
+function getSensitivityThresholds(sensitivity: 'quiet' | 'normal' | 'sensitive') {
+  switch (sensitivity) {
+    case 'quiet':
+      return { positiveSpeechThreshold: 0.5, negativeSpeechThreshold: 0.35 }
+    case 'sensitive':
+      return { positiveSpeechThreshold: 0.7, negativeSpeechThreshold: 0.5 }
+    default:
+      return { positiveSpeechThreshold: 0.6, negativeSpeechThreshold: 0.4 }
+  }
+}
+
+function classifyVADError(error: any): { message: string; action: string } {
+  const errorStr = String(error?.message || error).toLowerCase()
+  
+  if (errorStr.includes('permission') || errorStr.includes('not allowed')) {
+    return { 
+      message: 'Microphone access denied', 
+      action: 'Please allow microphone access in your browser settings' 
+    }
+  }
+  if (errorStr.includes('not found') || errorStr.includes('no device')) {
+    return { 
+      message: 'No microphone found', 
+      action: 'Please connect a microphone and refresh' 
+    }
+  }
+  if (errorStr.includes('not supported') || errorStr.includes('wasm')) {
+    return { 
+      message: 'Browser not supported', 
+      action: 'Try Chrome, Edge, or Firefox' 
+    }
+  }
+  if (errorStr.includes('network') || errorStr.includes('fetch')) {
+    return { 
+      message: 'Failed to load VAD model', 
+      action: 'Check your internet connection and refresh' 
+    }
+  }
+  return { 
+    message: 'Voice detection error', 
+    action: 'Try refreshing the page' 
+  }
+}
+
 export function useVAD() {
   const wsStatus = useStore((s) => s.wsStatus)
   const isVADEnabled = useStore((s) => s.isVADEnabled)
   const setVADStatus = useStore((s) => s.setVADStatus)
+  const setVADError = useStore((s) => s.setVADError)
+  const vadSensitivity = useStore((s) => s.vadSensitivity)
+  
+  const thresholds = getSensitivityThresholds(vadSensitivity)
 
   const vad = useMicVAD({
     startOnLoad: true,
@@ -47,6 +97,13 @@ export function useVAD() {
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
       console.log('[VAD] Speech started')
+      triggerHaptic(20)
+      updateThemeMood('creative')
+      perfMonitor.reset()
+      perfMonitor.start('total_response')
+      perfMonitor.start('speech_to_text')
+      state.setVADError(null)
+      
       if (state.isPlaying) {
         state.stopAudio()
         state.sendInterrupt()
@@ -62,10 +119,11 @@ export function useVAD() {
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
       console.log('[VAD] Speech ended, encoding', audio.length, 'samples as WAV')
+      triggerHaptic([10, 30, 10])
+      updateThemeMood('calm')
       state.setIsRecording(false)
       state.setIsTranscribing(true)
 
-      // Encode the complete speech segment as WAV and send it
       const wavBuffer = encodeWAV(audio, 16000)
       const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' })
       state.sendAudioChunk(wavBlob)
@@ -78,31 +136,24 @@ export function useVAD() {
       const state = useStore.getState()
       if (!state.isVADEnabled || state.wsStatus !== 'connected') return
 
-      // Drive the waveform visualizer with real-time speech probability
       if (probs.isSpeech > 0.3) {
-        // Compute RMS level from the frame for the audio level indicator
         let sum = 0
         for (let i = 0; i < frame.length; i++) {
           sum += frame[i] * frame[i]
         }
         const rms = Math.sqrt(sum / frame.length)
-        const level = Math.min(rms * 5, 1) // scale up for visibility
+        const level = Math.min(rms * 5, 1)
         state.setAudioLevel(level)
       }
     },
-    // These are the actual recognized properties in @ricky0123/vad-web@0.0.30:
-    // - model: 'v5' | 'legacy' (default 'legacy') -> selects silero_vad_v5.onnx or silero_vad_legacy.onnx
-    // - baseAssetPath: prepended to the hardcoded model + worklet filenames
-    // - onnxWASMBasePath: path for ONNX Runtime WASM files
-    // NOTE: 'modelURL' and 'workletURL' are NOT recognized and are silently ignored.
     model: 'v5',
     baseAssetPath: '/',
     onnxWASMBasePath: '/',
     ortConfig: (ort: any) => {
       ort.env.wasm.wasmPaths = '/'
     },
-    positiveSpeechThreshold: 0.6,
-    negativeSpeechThreshold: 0.4,
+    positiveSpeechThreshold: thresholds.positiveSpeechThreshold,
+    negativeSpeechThreshold: thresholds.negativeSpeechThreshold,
     minSpeechFrames: 3,
     preSpeechPadFrames: 5,
   } as any)
@@ -110,17 +161,25 @@ export function useVAD() {
   useEffect(() => {
     if (vad.loading) {
       setVADStatus('loading')
+      setVADError(null)
     } else if (vad.errored) {
-      const errMsg = typeof vad.errored === 'object' ? (vad.errored as any).message : String(vad.errored)
+      const classified = classifyVADError(vad.errored)
       console.error('[VAD] Hook error:', vad.errored)
-      if (isVADEnabled) {
-        toast.error(`Hands-Free Error: ${errMsg}`)
-      }
       setVADStatus('error')
+      setVADError(`${classified.message}: ${classified.action}`)
+      if (isVADEnabled) {
+        toast.error(`Hands-Free Error: ${classified.message}`)
+      }
     } else if (isVADEnabled && wsStatus === 'connected') {
       setVADStatus('active')
+      setVADError(null)
       if (!vad.listening) {
-        vad.start()
+        vad.start().catch((err: any) => {
+          console.error('[VAD] Start failed:', err)
+          const classified = classifyVADError(err)
+          setVADStatus('error')
+          setVADError(classified.message)
+        })
       }
     } else {
       setVADStatus('idle')
@@ -128,7 +187,7 @@ export function useVAD() {
         vad.pause()
       }
     }
-  }, [vad.loading, vad.errored, vad.listening, isVADEnabled, wsStatus])
+  }, [vad.loading, vad.errored, vad.listening, isVADEnabled, wsStatus, setVADStatus, setVADError])
 
   return vad
 }
