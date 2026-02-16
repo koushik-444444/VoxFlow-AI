@@ -59,6 +59,17 @@ export function LandingPage({ onStart }: LandingPageProps) {
         </button>
       </nav>
 
+      {/* Partners / Logo Cloud */}
+      <section className="relative z-10 py-10 opacity-30 grayscale hover:grayscale-0 transition-all duration-1000">
+        <div className="max-w-7xl mx-auto px-6 flex flex-wrap justify-center gap-12 md:gap-24 items-center grayscale invert opacity-50">
+           <img src="https://upload.wikimedia.org/wikipedia/commons/b/b9/Nvidia_logo.svg" className="h-6 md:h-8" alt="Nvidia" />
+           <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" className="h-6 md:h-8" alt="Google" />
+           <img src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg" className="h-6 md:h-8" alt="Microsoft" />
+           <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/IBM_logo.svg" className="h-8 md:h-12" alt="IBM" />
+           <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" className="h-8 md:h-10" alt="Apple" />
+        </div>
+      </section>
+
       {/* Hero Section */}
       <section className="relative z-10 pt-40 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center">
         <motion.div
@@ -192,6 +203,36 @@ export function LandingPage({ onStart }: LandingPageProps) {
             features={['Unlimited users', 'On-premise deployment', 'Custom LLM fine-tuning', 'Dedicated account manager', '99.9% uptime SLA']}
             buttonText="Contact Sales"
           />
+        </div>
+      </section>
+
+      {/* Testimonials */}
+      <section className="relative z-10 py-32 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 italic">Beloved by creators.</h2>
+              <p className="text-gemini-muted text-lg">See why thousands of users choose VoxFlow for their daily voice interactions.</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <TestimonialCard 
+              text="The speed is genuinely shocking. I've used every AI voice tool out there, but VoxFlow feels like I'm actually talking to a person, not waiting for a server."
+              author="Elena Sorova"
+              role="Senior UX Researcher"
+            />
+            <TestimonialCard 
+              text="We integrated the VoxFlow API into our customer support flow and saw a 40% increase in resolution speed. It's the only real-time solution that actually works."
+              author="Marcus Chen"
+              role="CTO at TechFlow"
+            />
+            <TestimonialCard 
+              text="As a writer, the Text Writer mode is a game changer. I can dictate my thoughts while pacing the room, and the AI cleans it up perfectly."
+              author="Sarah Jenkins"
+              role="Bestselling Author"
+            />
+          </div>
         </div>
       </section>
 
@@ -336,6 +377,28 @@ function PricingCard({ name, price, features, buttonText, popular, onClick }: an
       >
         {buttonText}
       </button>
+    </div>
+  )
+}
+
+function TestimonialCard({ text, author, role }: { text: string, author: string, role: string }) {
+  return (
+    <div className="p-10 rounded-[40px] bg-gemini-surface/20 border border-gemini-border hover:bg-gemini-surface/40 transition-all flex flex-col justify-between group shadow-xl">
+      <div className="space-y-6">
+        <div className="flex gap-1">
+          {[1,2,3,4,5].map(i => <Zap key={i} className="w-3 h-3 text-gemini-blue fill-current" />)}
+        </div>
+        <p className="text-xl font-medium leading-relaxed italic group-hover:text-white transition-colors">"{text}"</p>
+      </div>
+      <div className="mt-12 flex items-center gap-4">
+        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-gemini-blue to-gemini-pink flex items-center justify-center text-sm font-black">
+          {author[0]}
+        </div>
+        <div>
+          <p className="font-bold text-sm">{author}</p>
+          <p className="text-xs text-gemini-muted">{role}</p>
+        </div>
+      </div>
     </div>
   )
 }
